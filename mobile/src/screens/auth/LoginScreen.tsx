@@ -43,7 +43,20 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const handleBiometricLogin = async () => {
     const success = await biometricsService.authenticate();
     if (success) {
-      // Re-hydrate session via stored credentials
+      useAuthStore.getState().setSession(
+        {
+          id: 'usr-demo-1',
+          email: 'alex.chen@mit.edu',
+          name: 'Alex Chen',
+          role: 'student',
+          isEmailVerified: true,
+          createdAt: new Date().toISOString(),
+        },
+        {
+          accessToken: 'mock-access-token',
+          refreshToken: 'mock-refresh-token',
+        }
+      );
     }
   };
 

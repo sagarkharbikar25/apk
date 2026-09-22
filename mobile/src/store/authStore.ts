@@ -18,6 +18,7 @@ export interface AuthState {
   logout: () => void;
   setUser: (user: User) => void;
   setTokens: (tokens: AuthTokens) => void;
+  setSession: (user: User, tokens: AuthTokens) => void;
   clearError: () => void;
 }
 
@@ -164,6 +165,16 @@ export const useAuthStore = create<AuthState>((set, get) => {
       set({
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
+      });
+    },
+
+    setSession: (user: User, tokens: AuthTokens) => {
+      set({
+        user,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        isAuthenticated: true,
+        error: null,
       });
     },
 
