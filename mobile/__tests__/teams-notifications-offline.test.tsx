@@ -152,6 +152,10 @@ describe('Branch 2: Teams, Hackathons, Notifications & Offline Unit Tests', () =
         t.props.children.includes('Offline Mode')
       );
       expect(offlineNotice).toBeTruthy();
+
+      ReactTestRenderer.act(() => {
+        testRenderer.unmount();
+      });
     });
   });
 

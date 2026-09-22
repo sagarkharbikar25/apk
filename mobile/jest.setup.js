@@ -15,8 +15,8 @@ jest.mock('react-native-screens', () => {
 jest.mock('react-native-safe-area-context', () => {
   const inset = { top: 0, right: 0, bottom: 0, left: 0 };
   return {
-    SafeAreaProvider: ({ children }: any) => children,
-    SafeAreaConsumer: ({ children }: any) => children(inset),
+    SafeAreaProvider: ({ children }) => children,
+    SafeAreaConsumer: ({ children }) => children(inset),
     useSafeAreaInsets: () => inset,
     useSafeAreaFrame: () => ({ x: 0, y: 0, width: 390, height: 844 }),
   };
@@ -24,7 +24,7 @@ jest.mock('react-native-safe-area-context', () => {
 
 jest.mock('@react-navigation/native', () => {
   return {
-    NavigationContainer: ({ children }: any) => children,
+    NavigationContainer: ({ children }) => children,
     useNavigation: () => ({
       navigate: jest.fn(),
       goBack: jest.fn(),
@@ -38,7 +38,7 @@ jest.mock('@react-navigation/native', () => {
 jest.mock('@react-navigation/native-stack', () => {
   return {
     createNativeStackNavigator: () => ({
-      Navigator: ({ children }: any) => children,
+      Navigator: ({ children }) => children,
       Screen: () => null,
     }),
   };
@@ -47,7 +47,7 @@ jest.mock('@react-navigation/native-stack', () => {
 jest.mock('@react-navigation/bottom-tabs', () => {
   return {
     createBottomTabNavigator: () => ({
-      Navigator: ({ children }: any) => children,
+      Navigator: ({ children }) => children,
       Screen: () => null,
     }),
   };
@@ -57,14 +57,14 @@ jest.mock('@shopify/flash-list', () => {
   const React = require('react');
   const RN = require('react-native');
   return {
-    FlashList: ({ data, renderItem, ListEmptyComponent }: any) => {
+    FlashList: ({ data, renderItem, ListEmptyComponent }) => {
       if (!data || data.length === 0) {
         return ListEmptyComponent ? React.createElement(ListEmptyComponent) : null;
       }
       return React.createElement(
         RN.View,
         null,
-        data.map((item: any, index: number) =>
+        data.map((item, index) =>
           renderItem({ item, index, target: 'Cell' })
         )
       );
