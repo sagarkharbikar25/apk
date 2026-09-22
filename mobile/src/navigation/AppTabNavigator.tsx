@@ -1,39 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { AppTabParamList } from './types';
 import { DiscoverNavigator } from './DiscoverNavigator';
 import { ProfileNavigator } from './ProfileNavigator';
+import { TeamsNavigator } from './TeamsNavigator';
+import { HackathonsNavigator } from './HackathonsNavigator';
+import { NotificationsNavigator } from './NotificationsNavigator';
 import { colors, typography } from '../theme';
-
-// Placeholder stubs for Branch 2 (Member 4 UI Ownership)
-// These allow Branch 1 to compile and run seamlessly without touching Branch 2 code!
-const TeamsPlaceholder: React.FC = () => (
-  <View style={styles.placeholderContainer}>
-    <Text style={styles.placeholderTitle}>Teams & QR Module</Text>
-    <Text style={styles.placeholderSubtitle}>
-      Managed by Member 4 on feature/rn-teams-notifications
-    </Text>
-  </View>
-);
-
-const HackathonsPlaceholder: React.FC = () => (
-  <View style={styles.placeholderContainer}>
-    <Text style={styles.placeholderTitle}>Hackathons Catalog</Text>
-    <Text style={styles.placeholderSubtitle}>
-      Managed by Member 4 on feature/rn-teams-notifications
-    </Text>
-  </View>
-);
-
-const NotificationsPlaceholder: React.FC = () => (
-  <View style={styles.placeholderContainer}>
-    <Text style={styles.placeholderTitle}>Notifications Center</Text>
-    <Text style={styles.placeholderSubtitle}>
-      Managed by Member 4 on feature/rn-teams-notifications
-    </Text>
-  </View>
-);
 
 const Tab = createBottomTabNavigator<AppTabParamList>();
 
@@ -66,17 +39,17 @@ export const AppTabNavigator: React.FC = () => {
       />
       <Tab.Screen
         name="TeamsTab"
-        component={TeamsPlaceholder}
+        component={TeamsNavigator}
         options={{ tabBarLabel: 'Teams' }}
       />
       <Tab.Screen
         name="HackathonsTab"
-        component={HackathonsPlaceholder}
+        component={HackathonsNavigator}
         options={{ tabBarLabel: 'Hackathons' }}
       />
       <Tab.Screen
         name="NotificationsTab"
-        component={NotificationsPlaceholder}
+        component={NotificationsNavigator}
         options={{ tabBarLabel: 'Alerts' }}
       />
       <Tab.Screen
@@ -87,23 +60,3 @@ export const AppTabNavigator: React.FC = () => {
     </Tab.Navigator>
   );
 };
-
-const styles = StyleSheet.create({
-  placeholderContainer: {
-    flex: 1,
-    backgroundColor: colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  placeholderTitle: {
-    ...typography.h2,
-    color: colors.textPrimary,
-    marginBottom: 8,
-  },
-  placeholderSubtitle: {
-    ...typography.body,
-    color: colors.textSecondary,
-    textAlign: 'center',
-  },
-});
