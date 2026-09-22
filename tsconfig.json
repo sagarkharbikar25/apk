@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "resolvePackageJsonExports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "target": "ES2023",
+    "skipLibCheck": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "typeRoots": ["./backend/node_modules/@types", "./backend/node_modules"],
+    "types": ["vitest/globals", "node"]
+  },
+  "include": [
+    "backend/src/**/*",
+    "backend/test/**/*",
+    "backend/prisma/**/*"
+  ]
+}
