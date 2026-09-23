@@ -18,6 +18,8 @@ android/.gradle/
 local.properties
 .idea/
 .vscode/
+*.apk
+*.aab
 
 # Environment files
 .env
