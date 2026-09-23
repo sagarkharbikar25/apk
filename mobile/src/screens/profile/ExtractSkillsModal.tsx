@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { colors, typography, spacing, borderRadius } from '../../theme';
-import { Button, Card } from '../../components/ui';
+import { Button, Card, Icon } from '../../components/ui';
 import { useProfileStore } from '../../store/profileStore';
 
 interface ExtractSkillsModalProps {
@@ -76,8 +76,8 @@ export const ExtractSkillsModal: React.FC<ExtractSkillsModalProps> = ({
               <Text style={styles.title}>AI Skill Extraction</Text>
               <Text style={styles.subtitle}>Powered by Google Gemini</Text>
             </View>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Text style={styles.closeText}>✕</Text>
+            <TouchableOpacity onPress={onClose} style={styles.closeBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <Icon name="close" size={18} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
 

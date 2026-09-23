@@ -34,3 +34,11 @@ export type AppTabParamList = {
   NotificationsTab: undefined;
   ProfileTab: undefined;
 };
+
+export type OrganizerTabParamList = {
+  ManageTab: undefined;
+  SquadsTab: undefined;
+  BroadcastTab: undefined;
+  OrganizerProfileTab: undefined;
+};
+

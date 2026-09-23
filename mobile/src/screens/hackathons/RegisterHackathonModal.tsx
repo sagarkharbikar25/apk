@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { colors, typography, spacing, borderRadius } from '../../theme';
-import { Card, Button, Badge } from '../../components/ui';
+import { Card, Button, Badge, Icon } from '../../components/ui';
 import { useHackathonsStore } from '../../store/hackathonsStore';
 import { useTeamsStore } from '../../store/teamsStore';
 
@@ -61,8 +61,8 @@ export const RegisterHackathonModal: React.FC<RegisterHackathonModalProps> = ({
         <Card variant="elevated" style={styles.card}>
           <View style={styles.header}>
             <Text style={styles.title}>Register for Hackathon</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Text style={styles.closeText}>✕</Text>
+            <TouchableOpacity onPress={onClose} style={styles.closeBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <Icon name="close" size={18} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
 

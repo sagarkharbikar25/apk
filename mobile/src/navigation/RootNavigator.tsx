@@ -3,12 +3,13 @@ import { NavigationContainer } from '@react-navigation/native';
 import { useAuthStore } from '../store/authStore';
 import { AuthNavigator } from './AuthNavigator';
 import { AppTabNavigator } from './AppTabNavigator';
+import { OrganizerTabNavigator } from './OrganizerTabNavigator';
 import { SplashScreen } from '../screens/splash/SplashScreen';
 import { LoadingScreen } from '../components/ui';
 
 export const RootNavigator: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
-  const { isAuthenticated, isLoading } = useAuthStore();
+  const { isAuthenticated, user, isLoading } = useAuthStore();
 
   if (showSplash) {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
@@ -25,7 +26,15 @@ export const RootNavigator: React.FC = () => {
 
   return (
     <NavigationContainer>
-      {isAuthenticated ? <AppTabNavigator /> : <AuthNavigator />}
+      {isAuthenticated ? (
+        user?.role === 'organizer' ? (
+          <OrganizerTabNavigator />
+        ) : (
+          <AppTabNavigator />
+        )
+      ) : (
+        <AuthNavigator />
+      )}
     </NavigationContainer>
   );
 };

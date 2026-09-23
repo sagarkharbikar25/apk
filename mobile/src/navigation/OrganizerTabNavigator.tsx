@@ -1,20 +1,19 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { AppTabParamList } from './types';
-import { DiscoverNavigator } from './DiscoverNavigator';
-import { ProfileNavigator } from './ProfileNavigator';
-import { TeamsNavigator } from './TeamsNavigator';
-import { HackathonsNavigator } from './HackathonsNavigator';
-import { NotificationsNavigator } from './NotificationsNavigator';
+import { OrganizerTabParamList } from './types';
+import { OrganizerHackathonsScreen } from '../screens/organizer/OrganizerHackathonsScreen';
+import { OrganizerSquadsScreen } from '../screens/organizer/OrganizerSquadsScreen';
+import { OrganizerBroadcastScreen } from '../screens/organizer/OrganizerBroadcastScreen';
+import { OrganizerProfileScreen } from '../screens/organizer/OrganizerProfileScreen';
 import { colors, typography } from '../theme';
 import { Icon } from '../components/ui';
 
-const Tab = createBottomTabNavigator<AppTabParamList>();
+const Tab = createBottomTabNavigator<OrganizerTabParamList>();
 
-export const AppTabNavigator: React.FC = () => {
+export const OrganizerTabNavigator: React.FC = () => {
   return (
     <Tab.Navigator
-      initialRouteName="DiscoverTab"
+      initialRouteName="ManageTab"
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
@@ -25,7 +24,7 @@ export const AppTabNavigator: React.FC = () => {
           paddingBottom: 8,
           paddingTop: 8,
         },
-        tabBarActiveTintColor: colors.secondaryLight,
+        tabBarActiveTintColor: colors.primaryLight,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: {
           ...typography.captionBold,
@@ -35,40 +34,32 @@ export const AppTabNavigator: React.FC = () => {
       }}
     >
       <Tab.Screen
-        name="DiscoverTab"
-        component={DiscoverNavigator}
+        name="ManageTab"
+        component={OrganizerHackathonsScreen}
         options={{
-          tabBarLabel: 'Discover',
-          tabBarIcon: ({ color, size }) => <Icon name="discover" color={color} size={size || 22} />,
-        }}
-      />
-      <Tab.Screen
-        name="TeamsTab"
-        component={TeamsNavigator}
-        options={{
-          tabBarLabel: 'Teams',
-          tabBarIcon: ({ color, size }) => <Icon name="teams" color={color} size={size || 22} />,
-        }}
-      />
-      <Tab.Screen
-        name="HackathonsTab"
-        component={HackathonsNavigator}
-        options={{
-          tabBarLabel: 'Hackathons',
+          tabBarLabel: 'Manage',
           tabBarIcon: ({ color, size }) => <Icon name="hackathons" color={color} size={size || 22} />,
         }}
       />
       <Tab.Screen
-        name="NotificationsTab"
-        component={NotificationsNavigator}
+        name="SquadsTab"
+        component={OrganizerSquadsScreen}
         options={{
-          tabBarLabel: 'Alerts',
+          tabBarLabel: 'Squads',
+          tabBarIcon: ({ color, size }) => <Icon name="teams" color={color} size={size || 22} />,
+        }}
+      />
+      <Tab.Screen
+        name="BroadcastTab"
+        component={OrganizerBroadcastScreen}
+        options={{
+          tabBarLabel: 'Broadcast',
           tabBarIcon: ({ color, size }) => <Icon name="notifications" color={color} size={size || 22} />,
         }}
       />
       <Tab.Screen
-        name="ProfileTab"
-        component={ProfileNavigator}
+        name="OrganizerProfileTab"
+        component={OrganizerProfileScreen}
         options={{
           tabBarLabel: 'Profile',
           tabBarIcon: ({ color, size }) => <Icon name="profile" color={color} size={size || 22} />,

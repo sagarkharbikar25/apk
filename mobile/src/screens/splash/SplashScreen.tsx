@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Animated,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 
@@ -81,11 +82,11 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
       >
         {/* Futuristic Brand Emblem */}
         <View style={styles.emblemOuter}>
-          <View style={styles.emblemMiddle}>
-            <View style={styles.emblemCore}>
-              <Text style={styles.emblemIcon}>⚡</Text>
-            </View>
-          </View>
+          <Image
+            source={require('../../assets/logo.png')}
+            style={styles.logoImage}
+            resizeMode="cover"
+          />
         </View>
 
         {/* Brand Title */}
@@ -146,15 +147,26 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   emblemOuter: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    backgroundColor: colors.primarySubtle,
+    width: 120,
+    height: 120,
+    borderRadius: 30,
+    overflow: 'hidden',
     borderWidth: 2,
-    borderColor: colors.primary,
+    borderColor: colors.surfaceBorderHighlight,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing.xl,
+    backgroundColor: colors.surfaceElevated,
+    shadowColor: colors.secondaryLight,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.45,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  logoImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 28,
   },
   emblemMiddle: {
     width: 86,

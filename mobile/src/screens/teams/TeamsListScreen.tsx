@@ -10,7 +10,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { TeamsStackParamList } from '../../navigation/types';
 import { useTeamsStore, Team } from '../../store/teamsStore';
-import { Card, Badge, Avatar, Button, Header, LoadingScreen } from '../../components/ui';
+import { Card, Badge, Avatar, Button, Header, LoadingScreen, Icon } from '../../components/ui';
 import { colors, typography, spacing } from '../../theme';
 
 type Props = NativeStackScreenProps<TeamsStackParamList, 'TeamsList'>;
@@ -50,13 +50,15 @@ export const TeamsListScreen: React.FC<Props> = ({ navigation }) => {
         rightAction={
           <View style={styles.headerActions}>
             <Button
-              title="📷 Scan QR"
+              title="Scan QR"
+              leftIcon={<Icon name="qr" size={15} color={colors.secondaryLight} style={{ marginRight: 4 }} />}
               variant="outline"
               size="sm"
               onPress={() => navigation.navigate('QRScanner')}
             />
             <Button
-              title="+ Create"
+              title="Create"
+              leftIcon={<Icon name="teams" size={15} color={colors.textPrimary} style={{ marginRight: 4 }} />}
               size="sm"
               onPress={() => navigation.navigate('CreateTeam')}
             />

@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,8 +15,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../navigation/types';
 import { loginSchema, LoginFormData } from './validation';
 import { useAuthStore } from '../../store/authStore';
-import { Button, Input, Card } from '../../components/ui';
-import { colors, typography, spacing } from '../../theme';
+import { Button, Input, Card, Icon } from '../../components/ui';
+import { colors, typography, spacing, borderRadius } from '../../theme';
 import { biometricsService } from '../../services/biometrics';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
@@ -49,7 +50,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
           email: 'alex.chen@mit.edu',
           name: 'Alex Chen',
           role: 'student',
-          isEmailVerified: true,
+          isVerified: true,
           createdAt: new Date().toISOString(),
         },
         {
@@ -58,6 +59,24 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
         }
       );
     }
+  };
+
+  const handleQuickDemoLogin = (role: 'student' | 'organizer') => {
+    const isOrg = role === 'organizer';
+    useAuthStore.getState().setSession(
+      {
+        id: isOrg ? 'usr-demo-org' : 'usr-demo-std',
+        email: isOrg ? 'organizer@hackmit.org' : 'alex.chen@mit.edu',
+        name: isOrg ? 'Sarah Lin' : 'Alex Chen',
+        role: role,
+        isVerified: true,
+        createdAt: new Date().toISOString(),
+      },
+      {
+        accessToken: 'mock-access-token',
+        refreshToken: 'mock-refresh-token',
+      }
+    );
   };
 
   return (
@@ -70,6 +89,11 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
+          <Image
+            source={require('../../assets/logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
           <Text style={styles.brandTitle}>SkillSync</Text>
           <Text style={styles.subtitle}>Find Your Ideal Hackathon Teammates</Text>
         </View>
@@ -132,6 +156,31 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
             style={styles.bioBtn}
           />
 
+          {/* Quick Demo Switcher */}
+          <View style={styles.demoDivider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>QUICK DEMO ROLES</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <View style={styles.demoRow}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={[styles.demoBtn, styles.demoBtnStudent]}
+              onPress={() => handleQuickDemoLogin('student')}
+            >
+              <Text style={styles.demoBtnText}>Student Login</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={[styles.demoBtn, styles.demoBtnOrganizer]}
+              onPress={() => handleQuickDemoLogin('organizer')}
+            >
+              <Text style={styles.demoBtnText}>Organizer Login</Text>
+            </TouchableOpacity>
+          </View>
+
           <View style={styles.footerRow}>
             <Text style={styles.footerText}>Don't have an account? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Register')}>
@@ -156,7 +205,13 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: spacing.xxl,
+    marginBottom: spacing.xl,
+  },
+  logo: {
+    width: 80,
+    height: 80,
+    marginBottom: spacing.sm,
+    borderRadius: 20,
   },
   brandTitle: {
     ...typography.h1,
@@ -199,6 +254,47 @@ const styles = StyleSheet.create({
   },
   bioBtn: {
     marginTop: spacing.sm,
+  },
+  demoDivider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: spacing.lg,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.surfaceBorder,
+  },
+  dividerText: {
+    ...typography.captionBold,
+    color: colors.textMuted,
+    marginHorizontal: spacing.sm,
+    fontSize: 10,
+    letterSpacing: 1,
+  },
+  demoRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.xs,
+  },
+  demoBtn: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  demoBtnStudent: {
+    backgroundColor: colors.surfaceElevated,
+    borderColor: colors.secondary,
+  },
+  demoBtnOrganizer: {
+    backgroundColor: colors.surfaceElevated,
+    borderColor: colors.accentPurple,
+  },
+  demoBtnText: {
+    ...typography.captionBold,
+    color: colors.textPrimary,
   },
   footerRow: {
     flexDirection: 'row',

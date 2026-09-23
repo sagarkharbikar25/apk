@@ -7,3 +7,4 @@ export * from './SkeletonLoader';
 export * from './LoadingScreen';
 export * from './IconButton';
 export * from './Header';
+export * from './Icon';

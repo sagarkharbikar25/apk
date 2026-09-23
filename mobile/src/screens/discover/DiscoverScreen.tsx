@@ -7,9 +7,10 @@ import {
   RefreshControl,
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RecommendationItem } from '../../api/types';
 import { apiClient } from '../../api/client';
-import { Input, Button, Card, SkeletonLoader, IconButton } from '../../components/ui';
+import { Input, Button, Card, SkeletonLoader, IconButton, Icon } from '../../components/ui';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 import { RecommendationCard } from './RecommendationCard';
 import { FilterModal, FilterCriteria } from './FilterModal';
@@ -132,6 +133,7 @@ const DEFAULT_RECOMMENDATIONS: RecommendationItem[] = [
 ];
 
 export const DiscoverScreen: React.FC = () => {
+  const insets = useSafeAreaInsets();
   const [search, setSearch] = useState('');
   const [items, setItems] = useState<RecommendationItem[]>(DEFAULT_RECOMMENDATIONS);
   const [isLoading, setIsLoading] = useState(false);
@@ -201,18 +203,19 @@ export const DiscoverScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       {/* Search & Filter Header */}
-      <View style={styles.searchHeader}>
+      <View style={[styles.searchHeader, { paddingTop: Math.max(insets.top, 12) + spacing.xs }]}>
         <View style={styles.searchInputWrap}>
           <Input
             placeholder="Search skills, teammates, projects..."
             value={search}
             onChangeText={setSearch}
             containerStyle={styles.searchContainer}
+            leftIcon={<Icon name="search" size={16} color={colors.textMuted} style={{ marginRight: 6 }} />}
           />
         </View>
 
         <IconButton
-          icon="⚙"
+          icon={<Icon name="filter" size={18} color={hasActiveFilters ? colors.textPrimary : colors.secondaryLight} />}
           variant={hasActiveFilters ? 'primary' : 'default'}
           badgeCount={hasActiveFilters ? 1 : 0}
           onPress={() => setFilterModalVisible(true)}

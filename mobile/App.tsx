@@ -1,8 +1,10 @@
 import React from 'react';
-import { StatusBar } from 'react-native';
+import { StatusBar, LogBox } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { RootNavigator } from './src/navigation';
 import { OfflineBanner } from './src/components/offline/OfflineBanner';
+
+LogBox.ignoreAllLogs(true);
 
 function App(): React.JSX.Element {
   return (

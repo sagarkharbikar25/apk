@@ -6,7 +6,9 @@ import {
   TouchableOpacity,
   ViewStyle,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, typography, spacing } from '../../theme';
+import { Icon } from './Icon';
 
 export interface HeaderProps {
   title: string;
@@ -23,8 +25,16 @@ export const Header: React.FC<HeaderProps> = ({
   rightAction,
   style,
 }) => {
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={[styles.container, style]}>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: Math.max(insets.top, 12) + spacing.xs },
+        style,
+      ]}
+    >
       <View style={styles.leftRow}>
         {onBack && (
           <TouchableOpacity
@@ -32,8 +42,9 @@ export const Header: React.FC<HeaderProps> = ({
             onPress={onBack}
             style={styles.backButton}
             accessibilityLabel="Go back"
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Text style={styles.backArrow}>←</Text>
+            <Icon name="arrowBack" size={20} color={colors.textPrimary} />
           </TouchableOpacity>
         )}
         <View style={styles.titleContainer}>
@@ -58,8 +69,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.sm + 4,
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors.surfaceBorder,
@@ -71,13 +82,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   backButton: {
-    paddingRight: spacing.md,
+    marginRight: spacing.sm,
     paddingVertical: spacing.xs,
-  },
-  backArrow: {
-    fontSize: 24,
-    color: colors.textPrimary,
-    lineHeight: 26,
   },
   titleContainer: {
     flex: 1,

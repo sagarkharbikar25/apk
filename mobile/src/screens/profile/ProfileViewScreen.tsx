@@ -12,7 +12,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ProfileStackParamList } from '../../navigation/types';
 import { useProfileStore } from '../../store/profileStore';
 import { useAuthStore } from '../../store/authStore';
-import { Button, Card, Badge, Avatar, LoadingScreen } from '../../components/ui';
+import { Button, Card, Badge, Avatar, LoadingScreen, Icon } from '../../components/ui';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 import { ExtractSkillsModal } from './ExtractSkillsModal';
 
@@ -87,7 +87,7 @@ export const ProfileViewScreen: React.FC<Props> = ({ navigation }) => {
             <View style={styles.tagsRow}>
               <Badge
                 label={user?.role?.toUpperCase() || 'STUDENT'}
-                variant="primary"
+                variant={user?.role === 'organizer' ? 'secondary' : 'primary'}
                 size="sm"
               />
               {user?.lookingFor && (
@@ -192,7 +192,8 @@ export const ProfileViewScreen: React.FC<Props> = ({ navigation }) => {
 
         {/* AI Skill Extraction Trigger */}
         <Button
-          title="✨ Extract Skills with Gemini AI"
+          title="Extract Skills with Gemini AI"
+          leftIcon={<Icon name="sparkle" size={16} color={colors.textPrimary} style={{ marginRight: 8 }} />}
           variant="secondary"
           onPress={handleExtractSkills}
           style={styles.aiExtractBtn}
