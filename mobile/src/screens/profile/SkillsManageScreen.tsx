@@ -9,7 +9,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ProfileStackParamList } from '../../navigation/types';
 import { useProfileStore } from '../../store/profileStore';
-import { Button, Input, Card, Badge } from '../../components/ui';
+import { Button, Input, Card, Badge, getSkillBadgeVariant } from '../../components/ui';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 
 type Props = NativeStackScreenProps<ProfileStackParamList, 'SkillsManage'>;
@@ -63,7 +63,7 @@ export const SkillsManageScreen: React.FC<Props> = ({ navigation }) => {
               <Badge
                 key={userSkill.id}
                 label={`${userSkill.skill?.name || 'Skill'} (${userSkill.proficiencyLevel})`}
-                variant="primary"
+                variant={getSkillBadgeVariant(userSkill.skill?.name || '')}
                 size="md"
                 onRemove={() => removeSkill(userSkill.id)}
               />

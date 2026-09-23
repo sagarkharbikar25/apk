@@ -31,6 +31,8 @@ export const colors = {
   accentAmberSubtle: 'rgba(245, 158, 11, 0.16)',
   accentEmerald: '#10B981',     // Emerald Matrix
   accentEmeraldSubtle: 'rgba(16, 185, 129, 0.16)',
+  accentCyan: '#06B6D4',        // Cyber Neon Cyan
+  accentCyanSubtle: 'rgba(6, 182, 212, 0.16)',
 
   // Semantic Status Tones
   success: '#10B981',           // Emerald Matrix

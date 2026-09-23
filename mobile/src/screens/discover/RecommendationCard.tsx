@@ -9,7 +9,7 @@ import {
   UIManager,
 } from 'react-native';
 import { RecommendationItem } from '../../api/types';
-import { Card, Badge, Avatar, Button } from '../../components/ui';
+import { Card, Badge, Avatar, Button, getSkillBadgeVariant } from '../../components/ui';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 
 if (
@@ -91,7 +91,12 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
       {/* Skills Row */}
       <View style={styles.skillsRow}>
         {item.skills.slice(0, 4).map((skill, idx) => (
-          <Badge key={`${skill}-${idx}`} label={skill} variant="primary" size="sm" />
+          <Badge
+            key={`${skill}-${idx}`}
+            label={skill}
+            variant={getSkillBadgeVariant(skill)}
+            size="sm"
+          />
         ))}
         {item.skills.length > 4 && (
           <Badge

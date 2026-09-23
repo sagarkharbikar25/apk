@@ -12,7 +12,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ProfileStackParamList } from '../../navigation/types';
 import { useProfileStore } from '../../store/profileStore';
 import { useAuthStore } from '../../store/authStore';
-import { Button, Card, Badge, Avatar, LoadingScreen, Icon } from '../../components/ui';
+import { Button, Card, Badge, Avatar, LoadingScreen, Icon, getSkillBadgeVariant } from '../../components/ui';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 import { ExtractSkillsModal } from './ExtractSkillsModal';
 
@@ -175,15 +175,7 @@ export const ProfileViewScreen: React.FC<Props> = ({ navigation }) => {
               <Badge
                 key={item.id}
                 label={`${item.skill?.name || 'Skill'} (${item.proficiencyLevel})`}
-                variant={
-                  item.proficiencyLevel === 'expert'
-                    ? 'primary'
-                    : item.proficiencyLevel === 'advanced'
-                    ? 'secondary'
-                    : item.proficiencyLevel === 'intermediate'
-                    ? 'success'
-                    : 'muted'
-                }
+                variant={getSkillBadgeVariant(item.skill?.name || '')}
                 size="md"
               />
             ))}

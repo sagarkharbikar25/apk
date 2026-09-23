@@ -6,7 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
-import { Header, Card, Badge, Button, Avatar, Icon } from '../../components/ui';
+import { Header, Card, Badge, Button, Avatar, Icon, getSkillBadgeVariant } from '../../components/ui';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 
 interface RegisteredSquad {
@@ -136,7 +136,7 @@ export const OrganizerSquadsScreen: React.FC = () => {
             {/* Skills Badges */}
             <View style={styles.skillsRow}>
               {squad.skills.map((s, idx) => (
-                <Badge key={idx} label={s} variant="muted" size="sm" />
+                <Badge key={idx} label={s} variant={getSkillBadgeVariant(s)} size="sm" />
               ))}
             </View>
 
