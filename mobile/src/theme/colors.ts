@@ -64,6 +64,17 @@ export const colors = {
   error: '#FF6B6B',                   // Soft coral for danger actions
   errorSubtle: 'rgba(255, 107, 107, 0.12)',
 
+  // ── Match Score & Category Colors ─────────────────────────────
+  matchHigh: '#14E1C4',               // 90-100%: Teal-green
+  matchMed: '#FFB020',                // 70-89%: Trophy Gold
+  matchLow: '#6B7280',                // <70%: Slate
+  categoryFrontend: '#6EE7C4',
+  categoryBackend: '#38BDF8',
+  categoryAI: '#A78BFA',
+  categoryDevOps: '#F472B6',
+  categoryMobile: '#34D399',
+  categoryDesign: '#FBBF24',
+
   // ── Forms & Dividers ──────────────────────────────────────────
   inputBackground: '#16181C',
   inputBorder: '#24262B',

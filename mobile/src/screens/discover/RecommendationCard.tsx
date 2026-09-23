@@ -23,19 +23,36 @@ interface RecommendationCardProps {
   item: RecommendationItem;
   onConnect?: (item: RecommendationItem) => void;
   onPress?: () => void;
+  isInvited?: boolean;
 }
 
 export const RecommendationCard: React.FC<RecommendationCardProps> = ({
   item,
   onConnect,
   onPress,
+  isInvited = false,
 }) => {
   const [showBreakdown, setShowBreakdown] = useState(false);
+  const [internalInvited, setInternalInvited] = useState(false);
 
   const toggleBreakdown = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    try {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    } catch {
+      // Safe fallback if LayoutAnimation is unsupported on device
+    }
     setShowBreakdown(!showBreakdown);
   };
+
+  const handleConnectPress = () => {
+    if (onConnect) {
+      onConnect(item);
+    } else {
+      setInternalInvited(true);
+    }
+  };
+
+  const isActionDone = isInvited || internalInvited;
 
   const scorePercentage = Math.round(item.matchScore * 100);
 
@@ -245,10 +262,19 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
       {/* Action Footer with Primary Signal Teal CTA (Dark text for 4.5:1 contrast) */}
       <View style={styles.footerRow}>
         <Button
-          title={item.type === 'candidate' ? 'Invite to Team' : 'Apply to Project'}
-          variant="student"
+          title={
+            isActionDone
+              ? item.type === 'candidate'
+                ? '✓ Invited'
+                : '✓ Applied'
+              : item.type === 'candidate'
+              ? 'Invite to Team'
+              : 'Apply to Project'
+          }
+          variant={isActionDone ? 'outline' : 'student'}
           size="sm"
-          onPress={() => onConnect?.(item)}
+          disabled={isActionDone}
+          onPress={handleConnectPress}
           style={styles.connectBtn}
         />
       </View>

@@ -31,10 +31,11 @@ export class GeminiService {
 
   constructor(private configService: ConfigService) {
     const apiKey = this.configService.get<string>('GEMINI_API_KEY');
+    const modelName = this.configService.get<string>('GEMINI_MODEL') || 'gemini-3.6-flash';
     if (apiKey && apiKey !== 'mock-key' && apiKey !== 'test') {
       try {
         this.genAI = new GoogleGenerativeAI(apiKey);
-        this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        this.model = this.genAI.getGenerativeModel({ model: modelName });
       } catch (err: any) {
         this.logger.warn(`Failed to initialize Gemini AI: ${err.message}`);
       }

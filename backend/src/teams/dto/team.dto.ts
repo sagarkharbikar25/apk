@@ -17,6 +17,11 @@ export class CreateTeamDto {
   @IsNotEmpty()
   name: string;
 
+  @ApiPropertyOptional({ example: 'Building multimodal AI assistants' })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
   @ApiPropertyOptional({ example: 'uuid-project-id' })
   @IsOptional()
   @IsString()

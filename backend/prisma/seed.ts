@@ -301,6 +301,26 @@ async function main() {
   // 5. Seed Hackathons
   const hackathonsData = [
     {
+      title: 'HackMIT 2026',
+      description: "MIT's flagship premier hackathon hosting 1,000+ collegiate hackers from across the globe.",
+      organizerId: organizer.id,
+      startDate: new Date(Date.now() + 14 * 24 * 3600 * 1000),
+      endDate: new Date(Date.now() + 16 * 24 * 3600 * 1000),
+      registrationDeadline: new Date(Date.now() + 7 * 24 * 3600 * 1000),
+      maxTeamSize: 4,
+      isActive: true,
+    },
+    {
+      title: 'CalHacks 13.0',
+      description: "The world's largest collegiate hackathon at UC Berkeley with dedicated AI and Web3 tracks.",
+      organizerId: organizer.id,
+      startDate: new Date(Date.now() + 30 * 24 * 3600 * 1000),
+      endDate: new Date(Date.now() + 32 * 24 * 3600 * 1000),
+      registrationDeadline: new Date(Date.now() + 20 * 24 * 3600 * 1000),
+      maxTeamSize: 4,
+      isActive: true,
+    },
+    {
       title: 'AI In Action Global Hackathon 2026',
       description: 'Build cutting-edge multi-agent AI and mobile solutions to revolutionize student collaboration and campus tech.',
       organizerId: organizer.id,

@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ─── Enums ────────────────────────────────────────────────────
@@ -233,9 +234,10 @@ model ProjectApplication {
 }
 
 model Team {
-  id         String    @id @default(uuid())
-  name       String
-  projectId  String?   @map("project_id")
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  projectId   String?   @map("project_id")
   creatorId  String    @map("creator_id")
   qrCode     String    @unique @default(uuid()) @map("qr_code")
   maxMembers Int       @default(5) @map("max_members")

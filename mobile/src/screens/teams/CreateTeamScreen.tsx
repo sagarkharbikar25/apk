@@ -31,7 +31,7 @@ export const CreateTeamScreen: React.FC<Props> = ({ navigation }) => {
     const team = await createTeam({
       name: name.trim(),
       description: description.trim(),
-      hackathonId: hackathonId.trim() || undefined,
+      projectId: hackathonId.trim() || undefined,
       maxMembers,
     });
 

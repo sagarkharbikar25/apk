@@ -14,6 +14,7 @@ import { Input, Button, Card, SkeletonLoader, IconButton, Icon } from '../../com
 import { colors, typography, spacing, borderRadius } from '../../theme';
 import { RecommendationCard } from './RecommendationCard';
 import { FilterModal, FilterCriteria } from './FilterModal';
+import { InviteModal } from './InviteModal';
 
 const DEFAULT_RECOMMENDATIONS: RecommendationItem[] = [
   {
@@ -139,6 +140,8 @@ export const DiscoverScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [selectedInviteItem, setSelectedInviteItem] = useState<RecommendationItem | null>(null);
+  const [invitedIds, setInvitedIds] = useState<Record<string, boolean>>({});
   const [criteria, setCriteria] = useState<FilterCriteria>({
     type: 'all',
     category: 'All',
@@ -146,12 +149,26 @@ export const DiscoverScreen: React.FC = () => {
     minHours: 0,
   });
 
+  const handleConnect = (item: RecommendationItem) => {
+    setSelectedInviteItem(item);
+  };
+
+  const handleInviteSuccess = (itemId: string) => {
+    setInvitedIds((prev) => ({ ...prev, [itemId]: true }));
+  };
+
   const fetchRecommendations = async () => {
     setIsLoading(true);
     try {
       const response = await apiClient.get<RecommendationItem[]>('/recommendations');
       if (Array.isArray(response.data) && response.data.length > 0) {
-        setItems(response.data);
+        // Merge real backend recommendations with dummy items (real items prioritized)
+        const realIds = new Set(response.data.map((r) => r.id));
+        const merged = [
+          ...response.data,
+          ...DEFAULT_RECOMMENDATIONS.filter((d) => !realIds.has(d.id)),
+        ];
+        setItems(merged);
       } else {
         setItems(DEFAULT_RECOMMENDATIONS);
       }
@@ -260,14 +277,15 @@ export const DiscoverScreen: React.FC = () => {
             title="Reset Filters"
             variant="outline"
             size="sm"
-            onPress={() =>
+            onPress={() => {
+              setSearch('');
               setCriteria({
                 type: 'all',
                 category: 'All',
                 minScore: 0,
                 minHours: 0,
-              })
-            }
+              });
+            }}
             style={styles.resetBtn}
           />
         </Card>
@@ -275,7 +293,13 @@ export const DiscoverScreen: React.FC = () => {
         <FlashList
           data={filteredItems}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <RecommendationCard item={item} />}
+          renderItem={({ item }) => (
+            <RecommendationCard
+              item={item}
+              onConnect={handleConnect}
+              isInvited={Boolean(invitedIds[item.id])}
+            />
+          )}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl
@@ -293,6 +317,13 @@ export const DiscoverScreen: React.FC = () => {
         onClose={() => setFilterModalVisible(false)}
         criteria={criteria}
         onApply={(newCriteria) => setCriteria(newCriteria)}
+      />
+
+      <InviteModal
+        visible={!!selectedInviteItem}
+        item={selectedInviteItem}
+        onClose={() => setSelectedInviteItem(null)}
+        onSuccess={handleInviteSuccess}
       />
     </View>
   );

@@ -32,20 +32,20 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 900,
+        duration: 350,
         useNativeDriver: true,
       }),
       Animated.spring(scaleAnim, {
         toValue: 1,
         friction: 6,
-        tension: 40,
+        tension: 50,
         useNativeDriver: true,
       }),
     ]).start(() => {
       if (!isMounted) return;
       Animated.timing(textFadeAnim, {
         toValue: 1,
-        duration: 600,
+        duration: 250,
         useNativeDriver: true,
       }).start(() => {
         if (!isMounted) return;
@@ -53,7 +53,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
           if (isMounted) {
             onFinish?.();
           }
-        }, 1200);
+        }, 300);
       });
     });
 

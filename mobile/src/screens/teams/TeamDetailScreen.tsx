@@ -99,6 +99,17 @@ export const TeamDetailScreen: React.FC<Props> = ({ route, navigation }) => {
             onPress={() => setShowQRModal(true)}
             style={styles.shareBtn}
           />
+
+          {!isFull && (
+            <Button
+              title="Find & Invite Teammates"
+              variant="outline"
+              onPress={() => {
+                navigation.getParent()?.navigate('DiscoverTab');
+              }}
+              style={{ marginTop: spacing.sm }}
+            />
+          )}
         </Card>
 
         {/* Member List Section */}

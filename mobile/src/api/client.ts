@@ -1,9 +1,9 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { AuthTokens } from './types';
 
-// Default base URL: Android emulator loopback to host PC.
-// Can be changed dynamically via setApiBaseUrl(newUrl)
-const DEFAULT_BASE_URL = 'http://10.0.2.2:3000';
+// Base URL for standalone APK on local network / phone (10.217.110.197:3000)
+// Fallback/change dynamically via setApiBaseUrl(newUrl)
+const DEFAULT_BASE_URL = 'http://10.217.110.197:3000';
 
 export const apiClient = axios.create({
   baseURL: DEFAULT_BASE_URL,

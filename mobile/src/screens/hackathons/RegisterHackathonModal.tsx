@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   View,
@@ -26,7 +26,7 @@ export const RegisterHackathonModal: React.FC<RegisterHackathonModalProps> = ({
   hackathonTitle,
   maxTeamSize,
 }) => {
-  const { registerForHackathon, isRegistering, error } = useHackathonsStore();
+  const { registerForHackathon, isRegistering, error, clearError } = useHackathonsStore();
   const { teams } = useTeamsStore();
 
   const [registerType, setRegisterType] = useState<'individual' | 'team'>('team');
@@ -34,6 +34,18 @@ export const RegisterHackathonModal: React.FC<RegisterHackathonModalProps> = ({
     teams.length > 0 ? teams[0].id : null
   );
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (visible) {
+      clearError();
+      setSuccess(false);
+    }
+  }, [visible, clearError]);
+
+  const handleSelectType = (type: 'individual' | 'team') => {
+    clearError();
+    setRegisterType(type);
+  };
 
   const handleRegister = async () => {
     const res = await registerForHackathon(
@@ -94,7 +106,7 @@ export const RegisterHackathonModal: React.FC<RegisterHackathonModalProps> = ({
                 styles.typePill,
                 registerType === 'team' && styles.typePillActive,
               ]}
-              onPress={() => setRegisterType('team')}
+              onPress={() => handleSelectType('team')}
             >
               <Text
                 style={[
@@ -112,7 +124,7 @@ export const RegisterHackathonModal: React.FC<RegisterHackathonModalProps> = ({
                 styles.typePill,
                 registerType === 'individual' && styles.typePillActive,
               ]}
-              onPress={() => setRegisterType('individual')}
+              onPress={() => handleSelectType('individual')}
             >
               <Text
                 style={[
