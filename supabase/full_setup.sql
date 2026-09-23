@@ -1,6 +1,5 @@
 -- ====================================================================
--- SkillSync — Master Supabase SQL Setup (Schema, Seeds & Storage)
--- Run this complete script in Supabase Dashboard -> SQL Editor
+-- SkillSync — Master Supabase SQL Setup (Schema & Seed)
 -- ====================================================================
 
 -- ── 1. Extensions ───────────────────────────────────────────────────
@@ -333,51 +332,51 @@ ON CONFLICT ("name") DO NOTHING;
 -- ── 5. Seed Demo Users & Roles ──────────────────────────────────────
 -- Admin ('Admin@SkillSync2026!')
 INSERT INTO "users" ("id", "email", "password_hash", "role", "email_verified")
-VALUES ('c0a80101-0000-0000-0000-000000000001', 'admin@skillsync.io', '$2b$12$NlmzK2H84iWc53eJb/H7qu5KmgLq8Xv5F5R4dO6jX7.gO4K2vN6Wy', 'admin', true)
+VALUES ('a0000000-0000-0000-0000-000000000001', 'admin@skillsync.io', '$2b$12$NlmzK2H84iWc53eJb/H7qu5KmgLq8Xv5F5R4dO6jX7.gO4K2vN6Wy', 'admin', true)
 ON CONFLICT ("email") DO NOTHING;
 
 INSERT INTO "profiles" ("user_id", "display_name", "bio", "college", "location")
-VALUES ('c0a80101-0000-0000-0000-000000000001', 'SkillSync Master Admin', 'Platform Administrator & System Auditor', 'SkillSync HQ', 'San Francisco, CA')
+VALUES ('a0000000-0000-0000-0000-000000000001', 'SkillSync Master Admin', 'Platform Administrator & System Auditor', 'SkillSync HQ', 'San Francisco, CA')
 ON CONFLICT ("user_id") DO NOTHING;
 
 -- Organizer ('Organizer@2026!')
 INSERT INTO "users" ("id", "email", "password_hash", "role", "email_verified")
-VALUES ('c0a80101-0000-0000-0000-000000000002', 'organizer@skillsync.io', '$2b$10$w8.gU9qUjO3F4O5F1Y8y/OYmR67m5W3lGZ1A6i3b9e4Y0f8X2s1lq', 'organizer', true)
+VALUES ('a0000000-0000-0000-0000-000000000002', 'organizer@skillsync.io', '$2b$10$w8.gU9qUjO3F4O5F1Y8y/OYmR67m5W3lGZ1A6i3b9e4Y0f8X2s1lq', 'organizer', true)
 ON CONFLICT ("email") DO NOTHING;
 
 INSERT INTO "profiles" ("user_id", "display_name", "bio", "college", "location", "preferred_roles")
-VALUES ('c0a80101-0000-0000-0000-000000000002', 'TechFest Global Events', 'Global Hackathon & Tech Innovation Summit Committee', 'Stanford Innovation Lab', 'Palo Alto, CA', ARRAY['Hackathon Organizer', 'Event Director'])
+VALUES ('a0000000-0000-0000-0000-000000000002', 'TechFest Global Events', 'Global Hackathon & Tech Innovation Summit Committee', 'Stanford Innovation Lab', 'Palo Alto, CA', ARRAY['Hackathon Organizer', 'Event Director'])
 ON CONFLICT ("user_id") DO NOTHING;
 
 -- Students ('Password@123')
 INSERT INTO "users" ("id", "email", "password_hash", "role", "email_verified")
 VALUES 
-  ('c0a80101-0000-0000-0000-000000000003', 'student@skillsync.io', '$2b$10$yqJ1X1.4qZl2x7K7C3Kx5.G6x0jF2s1lqY8y/OYmR67m5W3lGZ1A6', 'student', true),
-  ('c0a80101-0000-0000-0000-000000000004', 'alex.chen@university.edu', '$2b$10$yqJ1X1.4qZl2x7K7C3Kx5.G6x0jF2s1lqY8y/OYmR67m5W3lGZ1A6', 'student', true),
-  ('c0a80101-0000-0000-0000-000000000005', 'maya.patel@tech.edu', '$2b$10$yqJ1X1.4qZl2x7K7C3Kx5.G6x0jF2s1lqY8y/OYmR67m5W3lGZ1A6', 'student', true)
+  ('a0000000-0000-0000-0000-000000000003', 'student@skillsync.io', '$2b$10$yqJ1X1.4qZl2x7K7C3Kx5.G6x0jF2s1lqY8y/OYmR67m5W3lGZ1A6', 'student', true),
+  ('a0000000-0000-0000-0000-000000000004', 'alex.chen@university.edu', '$2b$10$yqJ1X1.4qZl2x7K7C3Kx5.G6x0jF2s1lqY8y/OYmR67m5W3lGZ1A6', 'student', true),
+  ('a0000000-0000-0000-0000-000000000005', 'maya.patel@tech.edu', '$2b$10$yqJ1X1.4qZl2x7K7C3Kx5.G6x0jF2s1lqY8y/OYmR67m5W3lGZ1A6', 'student', true)
 ON CONFLICT ("email") DO NOTHING;
 
 INSERT INTO "profiles" ("user_id", "display_name", "bio", "college", "graduation_year", "location", "github_url", "linkedin_url", "looking_for", "preferred_roles")
 VALUES 
-  ('c0a80101-0000-0000-0000-000000000003', 'Dev Demo Student', 'Mobile & Web builder exploring AI-driven student platforms.', 'Stanford University', 2026, 'Stanford, CA', 'https://github.com/skillsync-dev', 'https://linkedin.com/in/skillsync-demo', 'both', ARRAY['Frontend Developer', 'Mobile Engineer']),
-  ('c0a80101-0000-0000-0000-000000000004', 'Alex Chen', 'Full-stack builder passionate about Mobile apps and Gemini AI.', 'UC Berkeley', 2026, 'Berkeley, CA', 'https://github.com/alexchen-dev', 'https://linkedin.com/in/alexchen', 'both', ARRAY['Full-Stack Developer', 'Mobile Lead']),
-  ('c0a80101-0000-0000-0000-000000000005', 'Maya Patel', 'AI researcher and Python engineer working on recommendation engines.', 'Georgia Tech', 2025, 'Atlanta, GA', 'https://github.com/mayapatel-ai', 'https://linkedin.com/in/mayapatel', 'teammate', ARRAY['AI/ML Engineer', 'Backend Specialist'])
+  ('a0000000-0000-0000-0000-000000000003', 'Dev Demo Student', 'Mobile & Web builder exploring AI-driven student platforms.', 'Stanford University', 2026, 'Stanford, CA', 'https://github.com/skillsync-dev', 'https://linkedin.com/in/skillsync-demo', 'both', ARRAY['Frontend Developer', 'Mobile Engineer']),
+  ('a0000000-0000-0000-0000-000000000004', 'Alex Chen', 'Full-stack builder passionate about Mobile apps and Gemini AI.', 'UC Berkeley', 2026, 'Berkeley, CA', 'https://github.com/alexchen-dev', 'https://linkedin.com/in/alexchen', 'both', ARRAY['Full-Stack Developer', 'Mobile Lead']),
+  ('a0000000-0000-0000-0000-000000000005', 'Maya Patel', 'AI researcher and Python engineer working on recommendation engines.', 'Georgia Tech', 2025, 'Atlanta, GA', 'https://github.com/mayapatel-ai', 'https://linkedin.com/in/mayapatel', 'teammate', ARRAY['AI/ML Engineer', 'Backend Specialist'])
 ON CONFLICT ("user_id") DO NOTHING;
 
 -- ── 6. Seed Sample Hackathons ───────────────────────────────────────
 INSERT INTO "hackathons" ("id", "title", "organizer_id", "description", "start_date", "end_date", "registration_deadline", "max_team_size", "is_active")
 VALUES 
-  ('h0a80101-0000-0000-0000-000000000001', 'AI In Action Global Hackathon 2026', 'c0a80101-0000-0000-0000-000000000002', 'Build cutting-edge multi-agent AI and mobile solutions to revolutionize student collaboration.', NOW() + INTERVAL '7 days', NOW() + INTERVAL '9 days', NOW() + INTERVAL '5 days', 4, true),
-  ('h0a80101-0000-0000-0000-000000000002', 'Campus Web3 & Cloud Summit 2026', 'c0a80101-0000-0000-0000-000000000002', 'Design next-generation decentralized infrastructure and cloud tools for universities.', NOW() + INTERVAL '20 days', NOW() + INTERVAL '22 days', NOW() + INTERVAL '18 days', 5, true)
+  ('b0000000-0000-0000-0000-000000000001', 'AI In Action Global Hackathon 2026', 'a0000000-0000-0000-0000-000000000002', 'Build cutting-edge multi-agent AI and mobile solutions to revolutionize student collaboration.', NOW() + INTERVAL '7 days', NOW() + INTERVAL '9 days', NOW() + INTERVAL '5 days', 4, true),
+  ('b0000000-0000-0000-0000-000000000002', 'Campus Web3 & Cloud Summit 2026', 'a0000000-0000-0000-0000-000000000002', 'Design next-generation decentralized infrastructure and cloud tools for universities.', NOW() + INTERVAL '20 days', NOW() + INTERVAL '22 days', NOW() + INTERVAL '18 days', 5, true)
 ON CONFLICT ("id") DO NOTHING;
 
 -- ── 7. Seed Sample Squad / Team ─────────────────────────────────────
 INSERT INTO "teams" ("id", "name", "creator_id", "qr_code", "max_members")
-VALUES ('t0a80101-0000-0000-0000-000000000001', 'CyberVanguard Squad', 'c0a80101-0000-0000-0000-000000000004', '7b2a6f81-99c2-4820-a6fe-f584e2079011', 4)
+VALUES ('c0000000-0000-0000-0000-000000000001', 'CyberVanguard Squad', 'a0000000-0000-0000-0000-000000000004', '7b2a6f81-99c2-4820-a6fe-f584e2079011', 4)
 ON CONFLICT ("id") DO NOTHING;
 
 INSERT INTO "team_members" ("team_id", "user_id", "role", "is_admin")
 VALUES 
-  ('t0a80101-0000-0000-0000-000000000001', 'c0a80101-0000-0000-0000-000000000004', 'Team Lead', true),
-  ('t0a80101-0000-0000-0000-000000000001', 'c0a80101-0000-0000-0000-000000000005', 'AI Researcher', false)
+  ('c0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000004', 'Team Lead', true),
+  ('c0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000005', 'AI Researcher', false)
 ON CONFLICT ("team_id", "user_id") DO NOTHING;
