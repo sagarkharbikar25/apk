@@ -1,5 +1,5 @@
 -- ====================================================================
--- SkillSync — Master Supabase SQL Setup (Schema, Storage, RLS & Seed)
+-- SkillSync — Master Supabase SQL Setup (Schema, Seeds & Storage)
 -- Run this complete script in Supabase Dashboard -> SQL Editor
 -- ====================================================================
 
@@ -275,35 +275,7 @@ CREATE TABLE IF NOT EXISTS "audit_logs" (
   "created_at" TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ── 4. Supabase Storage Buckets & Policies ───────────────────────────
-INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES 
-  ('avatars', 'avatars', true, 5242880, ARRAY['image/png', 'image/jpeg', 'image/webp']),
-  ('project-images', 'project-images', true, 10485760, ARRAY['image/png', 'image/jpeg', 'image/webp', 'image/gif'])
-ON CONFLICT (id) DO UPDATE SET
-  public = EXCLUDED.public,
-  file_size_limit = EXCLUDED.file_size_limit,
-  allowed_mime_types = EXCLUDED.allowed_mime_types;
-
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
-
-DO $$ BEGIN
-  CREATE POLICY "Public Read Avatars" ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
-EXCEPTION WHEN duplicate_object THEN null; END $$;
-
-DO $$ BEGIN
-  CREATE POLICY "Public Read Project Images" ON storage.objects FOR SELECT USING (bucket_id = 'project-images');
-EXCEPTION WHEN duplicate_object THEN null; END $$;
-
-DO $$ BEGIN
-  CREATE POLICY "Authenticated Upload Avatars" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'avatars');
-EXCEPTION WHEN duplicate_object THEN null; END $$;
-
-DO $$ BEGIN
-  CREATE POLICY "Authenticated Upload Project Images" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'project-images');
-EXCEPTION WHEN duplicate_object THEN null; END $$;
-
--- ── 5. Seed Skills Taxonomy (~45 Skills) ────────────────────────────
+-- ── 4. Seed Skills Taxonomy (~45 Skills) ────────────────────────────
 INSERT INTO "skills" ("name", "category") VALUES
   ('React Native', 'Mobile'),
   ('Flutter', 'Mobile'),
@@ -358,8 +330,8 @@ INSERT INTO "skills" ("name", "category") VALUES
   ('Web3.js', 'Blockchain')
 ON CONFLICT ("name") DO NOTHING;
 
--- ── 6. Seed Demo Users & Roles ──────────────────────────────────────
--- Password hash for 'Admin@SkillSync2026!'
+-- ── 5. Seed Demo Users & Roles ──────────────────────────────────────
+-- Admin ('Admin@SkillSync2026!')
 INSERT INTO "users" ("id", "email", "password_hash", "role", "email_verified")
 VALUES ('c0a80101-0000-0000-0000-000000000001', 'admin@skillsync.io', '$2b$12$NlmzK2H84iWc53eJb/H7qu5KmgLq8Xv5F5R4dO6jX7.gO4K2vN6Wy', 'admin', true)
 ON CONFLICT ("email") DO NOTHING;
@@ -368,7 +340,7 @@ INSERT INTO "profiles" ("user_id", "display_name", "bio", "college", "location")
 VALUES ('c0a80101-0000-0000-0000-000000000001', 'SkillSync Master Admin', 'Platform Administrator & System Auditor', 'SkillSync HQ', 'San Francisco, CA')
 ON CONFLICT ("user_id") DO NOTHING;
 
--- Password hash for 'Organizer@2026!'
+-- Organizer ('Organizer@2026!')
 INSERT INTO "users" ("id", "email", "password_hash", "role", "email_verified")
 VALUES ('c0a80101-0000-0000-0000-000000000002', 'organizer@skillsync.io', '$2b$10$w8.gU9qUjO3F4O5F1Y8y/OYmR67m5W3lGZ1A6i3b9e4Y0f8X2s1lq', 'organizer', true)
 ON CONFLICT ("email") DO NOTHING;
@@ -377,7 +349,7 @@ INSERT INTO "profiles" ("user_id", "display_name", "bio", "college", "location",
 VALUES ('c0a80101-0000-0000-0000-000000000002', 'TechFest Global Events', 'Global Hackathon & Tech Innovation Summit Committee', 'Stanford Innovation Lab', 'Palo Alto, CA', ARRAY['Hackathon Organizer', 'Event Director'])
 ON CONFLICT ("user_id") DO NOTHING;
 
--- Password hash for 'Password@123'
+-- Students ('Password@123')
 INSERT INTO "users" ("id", "email", "password_hash", "role", "email_verified")
 VALUES 
   ('c0a80101-0000-0000-0000-000000000003', 'student@skillsync.io', '$2b$10$yqJ1X1.4qZl2x7K7C3Kx5.G6x0jF2s1lqY8y/OYmR67m5W3lGZ1A6', 'student', true),
@@ -392,14 +364,14 @@ VALUES
   ('c0a80101-0000-0000-0000-000000000005', 'Maya Patel', 'AI researcher and Python engineer working on recommendation engines.', 'Georgia Tech', 2025, 'Atlanta, GA', 'https://github.com/mayapatel-ai', 'https://linkedin.com/in/mayapatel', 'teammate', ARRAY['AI/ML Engineer', 'Backend Specialist'])
 ON CONFLICT ("user_id") DO NOTHING;
 
--- ── 7. Seed Sample Hackathons ───────────────────────────────────────
+-- ── 6. Seed Sample Hackathons ───────────────────────────────────────
 INSERT INTO "hackathons" ("id", "title", "organizer_id", "description", "start_date", "end_date", "registration_deadline", "max_team_size", "is_active")
 VALUES 
   ('h0a80101-0000-0000-0000-000000000001', 'AI In Action Global Hackathon 2026', 'c0a80101-0000-0000-0000-000000000002', 'Build cutting-edge multi-agent AI and mobile solutions to revolutionize student collaboration.', NOW() + INTERVAL '7 days', NOW() + INTERVAL '9 days', NOW() + INTERVAL '5 days', 4, true),
   ('h0a80101-0000-0000-0000-000000000002', 'Campus Web3 & Cloud Summit 2026', 'c0a80101-0000-0000-0000-000000000002', 'Design next-generation decentralized infrastructure and cloud tools for universities.', NOW() + INTERVAL '20 days', NOW() + INTERVAL '22 days', NOW() + INTERVAL '18 days', 5, true)
 ON CONFLICT ("id") DO NOTHING;
 
--- ── 8. Seed Sample Squad / Team ─────────────────────────────────────
+-- ── 7. Seed Sample Squad / Team ─────────────────────────────────────
 INSERT INTO "teams" ("id", "name", "creator_id", "qr_code", "max_members")
 VALUES ('t0a80101-0000-0000-0000-000000000001', 'CyberVanguard Squad', 'c0a80101-0000-0000-0000-000000000004', '7b2a6f81-99c2-4820-a6fe-f584e2079011', 4)
 ON CONFLICT ("id") DO NOTHING;
