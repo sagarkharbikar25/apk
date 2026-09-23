@@ -1,0 +1,13 @@
+{
+  "name": "skillsync-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SkillSync - AI Hackathon Teammate Discovery & Management Platform",
+  "scripts": {
+    "start:backend": "cd backend && npm run start:dev",
+    "start:mobile": "cd mobile && npm run android",
+    "test:backend": "cd backend && npm test",
+    "test:mobile": "cd mobile && npm test",
+    "test:all": "npm run test:backend && npm run test:mobile"
+  }
+}
