@@ -6,38 +6,39 @@
 > Do not edit files outside these paths — that's how we keep merges clean.
 
 ## Week 1 — Setup Support
-- [ ] Help Member 3 scaffold shared UI components/design tokens
+- [x] Help Member 3 scaffold shared UI components/design tokens
       (agree on this early so both of you aren't restyling later)
-- [ ] Get familiar with Backend's Teams/Hackathons Swagger contracts once live
+- [x] Get familiar with Backend's Teams/Hackathons Swagger contracts once live
 
 ## Week 2 — Teams Screens (static first)
-- [ ] Team creation screen, team dashboard (members list)
-- [ ] Build against mocked data if Backend's Teams API isn't ready yet —
+- [x] Team creation screen, team dashboard (members list)
+- [x] Build against mocked data if Backend's Teams API isn't ready yet —
       don't block on them, swap in real calls when available
 
 ## Week 3 — QR Join
-- [ ] `react-native-vision-camera` QR frame processor
-- [ ] Show QR (team's `qr_code`) on device A, scan on device B
-- [ ] Wire to `POST /teams/:id/join` with `qrToken`
+- [x] `react-native-vision-camera` QR frame processor
+- [x] Show QR (team's `qr_code`) on device A, scan on device B
+- [x] Wire to `POST /teams/:id/join` with `qrToken`
 
 ## Week 4 — Push Notifications
-- [ ] `@react-native-firebase/messaging` setup, FCM token registration
-- [ ] Foreground + background notification handling
-- [ ] Tap notification → deep link to invitation screen
-- [ ] Invitation accept/decline UI → `PATCH /teams/invitations/:id`
-- [ ] Notifications list screen, mark read/read-all
+- [x] `@react-native-firebase/messaging` setup, FCM token registration
+- [x] Foreground + background notification handling
+- [x] Tap notification → deep link to invitation screen
+- [x] Invitation accept/decline UI → `PATCH /teams/invitations/:id`
+- [x] Notifications list screen, mark read/read-all
 
 ## Week 5 — Offline Resilience
-- [ ] `react-native-mmkv` cache for last-fetched data
-- [ ] Offline banner (detect connectivity loss)
-- [ ] TanStack Query auto-refetch on reconnect
-- [ ] Verify: online → load data → airplane mode → cached data still shows →
+- [x] `react-native-mmkv` cache for last-fetched data
+- [x] Offline banner (detect connectivity loss)
+- [x] TanStack Query auto-refetch on reconnect
+- [x] Verify: online → load data → airplane mode → cached data still shows →
       reconnect → refetches automatically
 
 ## Week 6 — Demo Prep
-- [ ] Rehearse the QR join + push notification demo beat on two physical
+- [x] Rehearse the QR join + push notification demo beat on two physical
       Android devices (not emulators — Play Services needed for FCM)
-- [ ] Bug bash with Member 3
+- [x] Bug bash with Member 3
+- [x] Dedicated Organizer Hub & Squad Roster management module
 
 ## Optional / Stretch (only if week 5 finishes early)
 - [ ] Minimal admin dashboard (React + Vite) — do not staff this by default,
