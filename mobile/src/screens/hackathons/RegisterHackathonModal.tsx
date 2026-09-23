@@ -271,15 +271,15 @@ const styles = StyleSheet.create({
     borderColor: colors.inputBorder,
   },
   typePillActive: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primarySubtle,
+    borderColor: colors.studentAccent,
+    backgroundColor: colors.surfaceElevated,
   },
   typeText: {
     ...typography.captionBold,
     color: colors.textMuted,
   },
   typeTextActive: {
-    color: colors.primaryLight,
+    color: colors.studentAccent,
   },
   teamSelectSection: {
     marginBottom: spacing.md,
@@ -303,15 +303,15 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   teamOptionActive: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primarySubtle,
+    borderColor: colors.studentAccent,
+    backgroundColor: colors.surfaceElevated,
   },
   teamOptionText: {
     ...typography.captionBold,
     color: colors.textSecondary,
   },
   teamOptionTextActive: {
-    color: colors.primaryLight,
+    color: colors.studentAccent,
   },
   actions: {
     flexDirection: 'row',

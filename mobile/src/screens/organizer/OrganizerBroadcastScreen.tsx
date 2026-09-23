@@ -137,7 +137,7 @@ export const OrganizerBroadcastScreen: React.FC = () => {
 
           <Button
             title="Dispatch Live Push Notification"
-            variant="secondary"
+            variant="organizer"
             isLoading={isSending}
             onPress={handleSendBroadcast}
             style={styles.sendBtn}

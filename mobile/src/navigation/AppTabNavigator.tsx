@@ -1,4 +1,5 @@
 import React from 'react';
+import { View, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { AppTabParamList } from './types';
 import { DiscoverNavigator } from './DiscoverNavigator';
@@ -10,6 +11,14 @@ import { colors, typography } from '../theme';
 import { Icon } from '../components/ui';
 
 const Tab = createBottomTabNavigator<AppTabParamList>();
+
+const TabBarIndicator: React.FC<{ focused: boolean; color: string }> = ({
+  focused,
+  color,
+}) => {
+  if (!focused) return null;
+  return <View style={[styles.activeIndicator, { backgroundColor: color }]} />;
+};
 
 export const AppTabNavigator: React.FC = () => {
   return (
@@ -23,9 +32,9 @@ export const AppTabNavigator: React.FC = () => {
           borderTopWidth: 1,
           height: 64,
           paddingBottom: 8,
-          paddingTop: 8,
+          paddingTop: 6,
         },
-        tabBarActiveTintColor: colors.secondaryLight,
+        tabBarActiveTintColor: colors.student,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: {
           ...typography.captionBold,
@@ -39,7 +48,12 @@ export const AppTabNavigator: React.FC = () => {
         component={DiscoverNavigator}
         options={{
           tabBarLabel: 'Discover',
-          tabBarIcon: ({ color, size }) => <Icon name="discover" color={color} size={size || 22} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={styles.tabIconWrap}>
+              <Icon name="discover" color={color} size={size || 22} />
+              <TabBarIndicator focused={focused} color={colors.student} />
+            </View>
+          ),
         }}
       />
       <Tab.Screen
@@ -47,7 +61,12 @@ export const AppTabNavigator: React.FC = () => {
         component={TeamsNavigator}
         options={{
           tabBarLabel: 'Teams',
-          tabBarIcon: ({ color, size }) => <Icon name="teams" color={color} size={size || 22} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={styles.tabIconWrap}>
+              <Icon name="teams" color={color} size={size || 22} />
+              <TabBarIndicator focused={focused} color={colors.student} />
+            </View>
+          ),
         }}
       />
       <Tab.Screen
@@ -55,7 +74,12 @@ export const AppTabNavigator: React.FC = () => {
         component={HackathonsNavigator}
         options={{
           tabBarLabel: 'Hackathons',
-          tabBarIcon: ({ color, size }) => <Icon name="hackathons" color={color} size={size || 22} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={styles.tabIconWrap}>
+              <Icon name="hackathons" color={color} size={size || 22} />
+              <TabBarIndicator focused={focused} color={colors.student} />
+            </View>
+          ),
         }}
       />
       <Tab.Screen
@@ -63,7 +87,12 @@ export const AppTabNavigator: React.FC = () => {
         component={NotificationsNavigator}
         options={{
           tabBarLabel: 'Alerts',
-          tabBarIcon: ({ color, size }) => <Icon name="notifications" color={color} size={size || 22} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={styles.tabIconWrap}>
+              <Icon name="notifications" color={color} size={size || 22} />
+              <TabBarIndicator focused={focused} color={colors.student} />
+            </View>
+          ),
         }}
       />
       <Tab.Screen
@@ -71,9 +100,30 @@ export const AppTabNavigator: React.FC = () => {
         component={ProfileNavigator}
         options={{
           tabBarLabel: 'Profile',
-          tabBarIcon: ({ color, size }) => <Icon name="profile" color={color} size={size || 22} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={styles.tabIconWrap}>
+              <Icon name="profile" color={color} size={size || 22} />
+              <TabBarIndicator focused={focused} color={colors.student} />
+            </View>
+          ),
         }}
       />
     </Tab.Navigator>
   );
 };
+
+const styles = StyleSheet.create({
+  tabIconWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    height: 30,
+  },
+  activeIndicator: {
+    position: 'absolute',
+    bottom: -6,
+    width: 18,
+    height: 2,
+    borderRadius: 1,
+  },
+});

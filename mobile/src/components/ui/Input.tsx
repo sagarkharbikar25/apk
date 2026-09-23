@@ -98,25 +98,25 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   label: {
-    ...typography.captionBold,
+    ...typography.caption,
     color: colors.textSecondary,
     marginBottom: spacing.xs,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 1,
+    fontSize: 11,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.inputBackground,
+    backgroundColor: colors.inputBackground, // #16181C
     borderWidth: 1,
-    borderColor: colors.inputBorder,
-    borderRadius: borderRadius.md,
+    borderColor: colors.inputBorder, // #24262B
+    borderRadius: borderRadius.sm,
     paddingHorizontal: spacing.md,
-    minHeight: 48,
+    minHeight: 46,
   },
   inputFocused: {
-    borderColor: colors.inputFocusBorder,
-    backgroundColor: colors.surface,
+    borderColor: colors.inputFocusBorder, // #3A3F4A
   },
   inputError: {
     borderColor: colors.error,
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     ...typography.body,
-    color: colors.textPrimary,
+    color: colors.textPrimary, // #EDEFF2
     paddingVertical: spacing.sm,
   },
   iconContainer: {
@@ -137,9 +137,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   eyeText: {
-    ...typography.captionBold,
-    color: colors.primaryLight,
+    ...typography.caption,
+    color: colors.textSecondary,
     fontSize: 11,
+    letterSpacing: 0.5,
   },
   errorText: {
     ...typography.caption,

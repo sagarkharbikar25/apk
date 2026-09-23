@@ -15,7 +15,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../navigation/types';
 import { loginSchema, LoginFormData } from './validation';
 import { useAuthStore } from '../../store/authStore';
-import { Button, Input, Card, Icon } from '../../components/ui';
+import { Button, Input, Card, Icon, AppLogo } from '../../components/ui';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 import { biometricsService } from '../../services/biometrics';
 
@@ -89,11 +89,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
-          <Image
-            source={require('../../assets/logo.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
+          <AppLogo size={64} style={{ marginBottom: spacing.md }} />
           <Text style={styles.brandTitle}>SkillSync</Text>
           <Text style={styles.subtitle}>Find Your Ideal Hackathon Teammates</Text>
         </View>
@@ -169,6 +165,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
               style={[styles.demoBtn, styles.demoBtnStudent]}
               onPress={() => handleQuickDemoLogin('student')}
             >
+              <View style={styles.studentDot} />
               <Text style={styles.demoBtnText}>Student Login</Text>
             </TouchableOpacity>
 
@@ -177,6 +174,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
               style={[styles.demoBtn, styles.demoBtnOrganizer]}
               onPress={() => handleQuickDemoLogin('organizer')}
             >
+              <View style={styles.organizerDot} />
               <Text style={styles.demoBtnText}>Organizer Login</Text>
             </TouchableOpacity>
           </View>
@@ -207,15 +205,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.xl,
   },
-  logo: {
-    width: 80,
-    height: 80,
-    marginBottom: spacing.sm,
-    borderRadius: 20,
-  },
   brandTitle: {
     ...typography.h1,
-    color: colors.primaryLight,
+    color: colors.textPrimary,
     letterSpacing: -0.5,
   },
   subtitle: {
@@ -279,18 +271,33 @@ const styles = StyleSheet.create({
   },
   demoBtn: {
     flex: 1,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.md,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.sm + 2,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.surfaceElevated,
     borderWidth: 1,
+    borderColor: colors.surfaceBorder,
+    gap: spacing.xs,
   },
   demoBtnStudent: {
-    backgroundColor: colors.surfaceElevated,
-    borderColor: colors.secondary,
+    borderColor: colors.surfaceBorder,
   },
   demoBtnOrganizer: {
-    backgroundColor: colors.surfaceElevated,
-    borderColor: colors.accentPurple,
+    borderColor: colors.surfaceBorder,
+  },
+  studentDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.studentAccent,
+  },
+  organizerDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.organizerAccent,
   },
   demoBtnText: {
     ...typography.captionBold,
@@ -307,6 +314,6 @@ const styles = StyleSheet.create({
   },
   linkText: {
     ...typography.bodyBold,
-    color: colors.primaryLight,
+    color: colors.studentAccent,
   },
 });

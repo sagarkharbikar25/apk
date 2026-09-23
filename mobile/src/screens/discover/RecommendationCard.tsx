@@ -39,10 +39,14 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
 
   const scorePercentage = Math.round(item.matchScore * 100);
 
+  // Dynamic Score Band Logic:
+  // 90–100%: Teal-green (#14E1C4)
+  // 70–89%: Trophy Gold (#FFB020)
+  // <70%: Slate (#6B7280)
   const getScoreColor = (score: number) => {
-    if (score >= 80) return colors.success;
-    if (score >= 60) return colors.warning;
-    return colors.primaryLight;
+    if (score >= 90) return colors.matchHigh;
+    if (score >= 70) return colors.matchMed;
+    return colors.matchLow;
   };
 
   const scoreColor = getScoreColor(scorePercentage);
@@ -74,12 +78,12 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
           )}
         </View>
 
-        {/* Circular Match Score Badge */}
+        {/* Dynamic Match Score Ring Badge */}
         <View style={[styles.scoreBadge, { borderColor: scoreColor }]}>
           <Text style={[styles.scoreNumber, { color: scoreColor }]}>
             {scorePercentage}%
           </Text>
-          <Text style={styles.scoreLabel}>MATCH</Text>
+          <Text style={[styles.scoreLabel, { color: scoreColor }]}>MATCH</Text>
         </View>
       </View>
 
@@ -88,7 +92,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
         {item.description}
       </Text>
 
-      {/* Skills Row */}
+      {/* Skills Row (Category-Coded Chips) */}
       <View style={styles.skillsRow}>
         {item.skills.slice(0, 4).map((skill, idx) => (
           <Badge
@@ -101,7 +105,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
         {item.skills.length > 4 && (
           <Badge
             label={`+${item.skills.length - 4} more`}
-            variant="muted"
+            variant="more"
             size="sm"
           />
         )}
@@ -135,7 +139,10 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
               <View
                 style={[
                   styles.meterFill,
-                  { width: `${Math.round(item.breakdown.skillCoverage * 100)}%` },
+                  {
+                    width: `${Math.round(item.breakdown.skillCoverage * 100)}%`,
+                    backgroundColor: colors.student,
+                  },
                 ]}
               />
             </View>
@@ -154,7 +161,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                   styles.meterFill,
                   {
                     width: `${Math.round(item.breakdown.complementarySkills * 100)}%`,
-                    backgroundColor: colors.secondary,
+                    backgroundColor: colors.categoryBackend,
                   },
                 ]}
               />
@@ -174,7 +181,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                   styles.meterFill,
                   {
                     width: `${Math.round(item.breakdown.availabilityMatch * 100)}%`,
-                    backgroundColor: colors.info,
+                    backgroundColor: colors.success,
                   },
                 ]}
               />
@@ -194,7 +201,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                   styles.meterFill,
                   {
                     width: `${Math.round(item.breakdown.interestOverlap * 100)}%`,
-                    backgroundColor: colors.warning,
+                    backgroundColor: colors.organizer,
                   },
                 ]}
               />
@@ -214,7 +221,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                   styles.meterFill,
                   {
                     width: `${Math.round(item.breakdown.experienceLevel * 100)}%`,
-                    backgroundColor: colors.success,
+                    backgroundColor: colors.categoryAI,
                   },
                 ]}
               />
@@ -235,10 +242,11 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
         </View>
       )}
 
-      {/* Action Footer */}
+      {/* Action Footer with Primary Signal Teal CTA (Dark text for 4.5:1 contrast) */}
       <View style={styles.footerRow}>
         <Button
           title={item.type === 'candidate' ? 'Invite to Team' : 'Apply to Project'}
+          variant="student"
           size="sm"
           onPress={() => onConnect?.(item)}
           style={styles.connectBtn}
@@ -252,6 +260,9 @@ const styles = StyleSheet.create({
   card: {
     padding: spacing.md,
     marginBottom: spacing.md,
+    backgroundColor: colors.surfaceCard,
+    borderWidth: 1,
+    borderColor: colors.surfaceBorder,
   },
   headerRow: {
     flexDirection: 'row',
@@ -273,12 +284,12 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     ...typography.captionBold,
-    color: colors.primaryLight,
+    color: colors.student,
     marginTop: 1,
   },
   collegeText: {
     ...typography.caption,
-    color: colors.textMuted,
+    color: colors.textSecondary,
     marginTop: 2,
   },
   scoreBadge: {
@@ -298,12 +309,12 @@ const styles = StyleSheet.create({
   scoreLabel: {
     ...typography.caption,
     fontSize: 9,
-    color: colors.textMuted,
-    fontWeight: '700',
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
   description: {
     ...typography.body,
-    color: colors.textSecondary,
+    color: colors.textBody,
     marginVertical: spacing.xs,
     lineHeight: 20,
   },
@@ -323,7 +334,7 @@ const styles = StyleSheet.create({
   },
   breakdownToggleText: {
     ...typography.captionBold,
-    color: colors.primaryLight,
+    color: colors.student,
   },
   breakdownContainer: {
     backgroundColor: colors.surfaceElevated,
@@ -363,7 +374,6 @@ const styles = StyleSheet.create({
   },
   meterFill: {
     height: '100%',
-    backgroundColor: colors.primary,
     borderRadius: borderRadius.full,
   },
   reasoningBox: {
@@ -374,12 +384,12 @@ const styles = StyleSheet.create({
   },
   reasoningTitle: {
     ...typography.captionBold,
-    color: colors.secondaryLight,
+    color: colors.student,
     marginBottom: 2,
   },
   reasoningBullet: {
     ...typography.caption,
-    color: colors.textSecondary,
+    color: colors.textBody,
     lineHeight: 18,
   },
   footerRow: {
@@ -388,6 +398,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   connectBtn: {
-    minWidth: 120,
+    minWidth: 130,
   },
 });

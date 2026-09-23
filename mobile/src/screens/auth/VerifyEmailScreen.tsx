@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   },
   emailHighlight: {
     ...typography.bodyBold,
-    color: colors.primaryLight,
+    color: colors.studentAccent,
     marginBottom: spacing.lg,
   },
   errorBanner: {
@@ -162,16 +162,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   infoBanner: {
-    backgroundColor: colors.primarySubtle,
+    backgroundColor: colors.surfaceElevated,
     borderWidth: 1,
-    borderColor: colors.primary,
+    borderColor: colors.studentAccent,
     borderRadius: spacing.sm,
     padding: spacing.sm,
     marginBottom: spacing.md,
   },
   infoBannerText: {
     ...typography.captionBold,
-    color: colors.primaryLight,
+    color: colors.studentAccent,
     textAlign: 'center',
   },
   inputContainer: {
@@ -182,6 +182,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     letterSpacing: 8,
     fontWeight: '700',
+    color: colors.studentAccent,
   },
   submitBtn: {
     marginTop: spacing.sm,
@@ -196,7 +197,7 @@ const styles = StyleSheet.create({
   },
   resendActionText: {
     ...typography.captionBold,
-    color: colors.primaryLight,
+    color: colors.studentAccent,
   },
   backBtn: {
     alignItems: 'center',

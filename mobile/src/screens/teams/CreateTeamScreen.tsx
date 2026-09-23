@@ -176,15 +176,15 @@ const styles = StyleSheet.create({
     borderColor: colors.inputBorder,
   },
   capacityPillActive: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primarySubtle,
+    borderColor: colors.studentAccent,
+    backgroundColor: colors.surfaceElevated,
   },
   capacityText: {
     ...typography.captionBold,
     color: colors.textMuted,
   },
   capacityTextActive: {
-    color: colors.primaryLight,
+    color: colors.studentAccent,
   },
   capacityHint: {
     ...typography.caption,

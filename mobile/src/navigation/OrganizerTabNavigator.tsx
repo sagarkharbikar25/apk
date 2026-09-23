@@ -1,4 +1,5 @@
 import React from 'react';
+import { View, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { OrganizerTabParamList } from './types';
 import { OrganizerHackathonsScreen } from '../screens/organizer/OrganizerHackathonsScreen';
@@ -9,6 +10,14 @@ import { colors, typography } from '../theme';
 import { Icon } from '../components/ui';
 
 const Tab = createBottomTabNavigator<OrganizerTabParamList>();
+
+const TabBarIndicator: React.FC<{ focused: boolean; color: string }> = ({
+  focused,
+  color,
+}) => {
+  if (!focused) return null;
+  return <View style={[styles.activeIndicator, { backgroundColor: color }]} />;
+};
 
 export const OrganizerTabNavigator: React.FC = () => {
   return (
@@ -22,9 +31,9 @@ export const OrganizerTabNavigator: React.FC = () => {
           borderTopWidth: 1,
           height: 64,
           paddingBottom: 8,
-          paddingTop: 8,
+          paddingTop: 6,
         },
-        tabBarActiveTintColor: colors.primaryLight,
+        tabBarActiveTintColor: colors.organizer,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: {
           ...typography.captionBold,
@@ -38,7 +47,12 @@ export const OrganizerTabNavigator: React.FC = () => {
         component={OrganizerHackathonsScreen}
         options={{
           tabBarLabel: 'Manage',
-          tabBarIcon: ({ color, size }) => <Icon name="hackathons" color={color} size={size || 22} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={styles.tabIconWrap}>
+              <Icon name="hackathons" color={color} size={size || 22} />
+              <TabBarIndicator focused={focused} color={colors.organizer} />
+            </View>
+          ),
         }}
       />
       <Tab.Screen
@@ -46,7 +60,12 @@ export const OrganizerTabNavigator: React.FC = () => {
         component={OrganizerSquadsScreen}
         options={{
           tabBarLabel: 'Squads',
-          tabBarIcon: ({ color, size }) => <Icon name="teams" color={color} size={size || 22} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={styles.tabIconWrap}>
+              <Icon name="teams" color={color} size={size || 22} />
+              <TabBarIndicator focused={focused} color={colors.organizer} />
+            </View>
+          ),
         }}
       />
       <Tab.Screen
@@ -54,7 +73,12 @@ export const OrganizerTabNavigator: React.FC = () => {
         component={OrganizerBroadcastScreen}
         options={{
           tabBarLabel: 'Broadcast',
-          tabBarIcon: ({ color, size }) => <Icon name="notifications" color={color} size={size || 22} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={styles.tabIconWrap}>
+              <Icon name="notifications" color={color} size={size || 22} />
+              <TabBarIndicator focused={focused} color={colors.organizer} />
+            </View>
+          ),
         }}
       />
       <Tab.Screen
@@ -62,9 +86,30 @@ export const OrganizerTabNavigator: React.FC = () => {
         component={OrganizerProfileScreen}
         options={{
           tabBarLabel: 'Profile',
-          tabBarIcon: ({ color, size }) => <Icon name="profile" color={color} size={size || 22} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={styles.tabIconWrap}>
+              <Icon name="profile" color={color} size={size || 22} />
+              <TabBarIndicator focused={focused} color={colors.organizer} />
+            </View>
+          ),
         }}
       />
     </Tab.Navigator>
   );
 };
+
+const styles = StyleSheet.create({
+  tabIconWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    height: 30,
+  },
+  activeIndicator: {
+    position: 'absolute',
+    bottom: -6,
+    width: 18,
+    height: 2,
+    borderRadius: 1,
+  },
+});

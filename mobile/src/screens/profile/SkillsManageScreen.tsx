@@ -234,8 +234,8 @@ const styles = StyleSheet.create({
     borderColor: colors.inputBorder,
   },
   levelPillActive: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primarySubtle,
+    borderColor: colors.studentAccent,
+    backgroundColor: colors.surfaceElevated,
   },
   levelText: {
     ...typography.caption,
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   levelTextActive: {
-    color: colors.primaryLight,
+    color: colors.studentAccent,
   },
   catalogLabel: {
     ...typography.captionBold,
@@ -269,15 +269,15 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   catalogItemActive: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primarySubtle,
+    borderColor: colors.studentAccent,
+    backgroundColor: colors.surfaceElevated,
   },
   catalogItemText: {
     ...typography.captionBold,
     color: colors.textSecondary,
   },
   catalogItemTextActive: {
-    color: colors.primaryLight,
+    color: colors.studentAccent,
   },
   categoryBadge: {
     ...typography.caption,

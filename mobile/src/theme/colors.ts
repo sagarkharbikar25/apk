@@ -1,66 +1,78 @@
+/**
+ * "Quiet Focus" Theme Palette
+ * A restrained, editorial dark theme designed for student focus and minimal cognitive load.
+ * Base: Matte near-black & low-contrast neutrals.
+ * Accents: Single accent per role (Soft Mint #6EE7C4 for Student, Soft Amber #E8B25E for Organizer).
+ */
 export const colors = {
-  // Deep Cosmic Obsidian Noir Surfaces (Zero generic blue, pure deep AI noir)
-  background: '#090A0F',
-  surface: '#13141E',
-  surfaceElevated: '#1C1E2C',
-  surfaceCard: '#171824',
-  surfaceBorder: '#2D3044',
-  surfaceBorderHighlight: '#C084FC',
-  surfaceGlass: 'rgba(19, 20, 30, 0.85)',
+  // ── Base Surfaces ─────────────────────────────────────────────
+  background: '#0E0F12',              // Matte near-black
+  surface: '#16181C',                 // Card surface
+  surfaceElevated: '#1B1E23',         // Pressed / active card surface
+  surfaceCard: '#16181C',
+  surfaceBorder: '#24262B',           // 1px low-contrast structural border / divider
+  surfaceBorderHighlight: '#24262B',  // Keep borders neutral (no color shift)
+  surfaceGlass: 'rgba(22, 24, 28, 0.95)',
 
-  // Brand Primary — Gemini Electric Amethyst
-  primary: '#A855F7',           // Vibrant Electric Amethyst
-  primaryLight: '#C084FC',      // Luminous Lavender Glow
-  primaryDark: '#7E22CE',       // Deep Royal Amethyst
-  primarySubtle: 'rgba(168, 85, 247, 0.16)',
-  primaryGlow: 'rgba(192, 132, 252, 0.38)',
+  // ── Role Accents (Single Accent per role) ─────────────────────
+  // Student Role Accent — Soft Mint (Actionable signal only)
+  student: '#6EE7C4',
+  studentLight: '#A7F3D0',
+  studentDark: '#34D399',
+  studentSubtle: 'rgba(110, 231, 196, 0.12)',
 
-  // Brand Secondary — Gemini Sunset Rose & Neon Coral
-  secondary: '#F43F5E',         // Sunset Neon Rose
-  secondaryLight: '#FB7185',    // Radiant Coral Glow
-  secondaryDark: '#E11D48',     // Deep Crimson Rose
-  secondarySubtle: 'rgba(244, 63, 94, 0.16)',
-  secondaryGlow: 'rgba(251, 113, 133, 0.35)',
+  // Organizer Role Accent — Soft Amber (Actionable signal only)
+  organizer: '#E8B25E',
+  organizerLight: '#FDE68A',
+  organizerDark: '#D97706',
+  organizerSubtle: 'rgba(232, 178, 94, 0.12)',
 
-  // Supporting Gemini AI Accents
-  accentPink: '#EC4899',        // Prismatic Fuchsia
-  accentPinkSubtle: 'rgba(236, 72, 153, 0.16)',
-  accentPurple: '#A855F7',      // Electric Amethyst
-  accentPurpleSubtle: 'rgba(168, 85, 247, 0.16)',
-  accentAmber: '#F59E0B',       // Solar Flare Gold
-  accentAmberSubtle: 'rgba(245, 158, 11, 0.16)',
-  accentEmerald: '#10B981',     // Emerald Matrix
-  accentEmeraldSubtle: 'rgba(16, 185, 129, 0.16)',
-  accentCyan: '#06B6D4',        // Cyber Neon Cyan
-  accentCyanSubtle: 'rgba(6, 182, 212, 0.16)',
+  // Aliases
+  studentAccent: '#6EE7C4',
+  organizerAccent: '#E8B25E',
+  primary: '#6EE7C4',                 // Default to Student accent
+  primaryLight: '#A7F3D0',
+  primaryDark: '#34D399',
+  primarySubtle: 'rgba(110, 231, 196, 0.12)',
 
-  // Semantic Status Tones
-  success: '#10B981',           // Emerald Matrix
-  successSubtle: 'rgba(16, 185, 129, 0.16)',
-  warning: '#F59E0B',           // Solar Gold
-  warningSubtle: 'rgba(245, 158, 11, 0.16)',
-  error: '#EF4444',             // Crimson Alert
-  errorSubtle: 'rgba(239, 68, 68, 0.16)',
-  info: '#C084FC',              // Amethyst Info
+  secondary: '#E8B25E',               // Default to Organizer accent
+  secondaryLight: '#FDE68A',
+  secondaryDark: '#D97706',
+  secondarySubtle: 'rgba(232, 178, 94, 0.12)',
 
-  // Non-Generic Typography Hierarchy
-  textPrimary: '#FAF5FF',       // Frost Lavender White
-  textSecondary: '#A1A1AA',     // Slate Warm Gray
-  textMuted: '#71717A',         // Steel Zinc
-  textInverse: '#090A0F',
-  textAccent: '#E879F9',        // Orchid Spark
-  textCyan: '#FB7185',          // Coral Glow replacement
+  // ── Neutral Chips (Quiet Focus — All tags are neutral) ────────
+  chipBackground: '#1F2226',
+  chipText: '#C7CBD1',
+  chipMoreText: '#868D99',
 
-  // Form & Inputs
-  inputBackground: '#0F1018',
-  inputBorder: '#27293A',
-  inputFocusBorder: '#A855F7',
-  inputPlaceholder: '#52525B',
+  // ── Typography & Neutrals ─────────────────────────────────────
+  textPrimary: '#EDEFF2',             // Headings & high-priority text
+  textSecondary: '#868D99',           // Muted secondary text
+  textBody: '#A7ACB4',                // Body copy
+  textMuted: '#565B64',               // Inactive nav, timestamps, metadata
+  textDark: '#0E0F12',                // High-contrast dark text on Mint / Amber CTA
+  textInverse: '#0E0F12',
+  textAccent: '#6EE7C4',
 
-  // Overlay & Highlights
-  divider: '#27293A',
-  overlay: 'rgba(9, 10, 15, 0.92)',
-  shimmer: '#27293A',
+  // ── Functional Status Indicators ──────────────────────────────
+  statusActive: '#6EE7C4',            // 6px dot for active status
+  statusInactive: '#565B64',          // 6px dot for upcoming / closed
+  success: '#6EE7C4',
+  successSubtle: 'rgba(110, 231, 196, 0.12)',
+  warning: '#E8B25E',
+  warningSubtle: 'rgba(232, 178, 94, 0.12)',
+  error: '#FF6B6B',                   // Soft coral for danger actions
+  errorSubtle: 'rgba(255, 107, 107, 0.12)',
+
+  // ── Forms & Dividers ──────────────────────────────────────────
+  inputBackground: '#16181C',
+  inputBorder: '#24262B',
+  inputFocusBorder: '#3A3F4A',        // Restrained focus border
+  inputPlaceholder: '#565B64',
+
+  divider: '#24262B',
+  overlay: 'rgba(14, 15, 18, 0.94)',
+  shimmer: '#1F2226',
 } as const;
 
 export type ColorToken = keyof typeof colors;

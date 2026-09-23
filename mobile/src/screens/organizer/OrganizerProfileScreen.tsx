@@ -50,8 +50,8 @@ export const OrganizerProfileScreen: React.FC = () => {
               <Text style={styles.nameText}>{user?.name || 'Sarah Lin'}</Text>
               <Text style={styles.emailText}>{user?.email || 'organizer@hackmit.org'}</Text>
               <View style={styles.badgeRow}>
-                <Badge label="ORGANIZER" variant="secondary" size="sm" />
-                <Badge label="VERIFIED ORG" variant="primary" size="sm" />
+                <Badge label="ORGANIZER" variant="organizer" size="sm" />
+                <Badge label="VERIFIED ORG" variant="upcoming" size="sm" />
               </View>
             </View>
           </View>
@@ -79,7 +79,7 @@ export const OrganizerProfileScreen: React.FC = () => {
           <Text style={styles.sectionHeader}>ROLE SWITCH & DEMO CONTROLS</Text>
           <Button
             title="Switch to Student / Hacker View"
-            variant="outline"
+            variant="outlineOrganizer"
             onPress={handleSwitchToStudent}
             style={styles.switchBtn}
           />

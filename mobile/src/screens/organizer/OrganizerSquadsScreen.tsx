@@ -116,7 +116,7 @@ export const OrganizerSquadsScreen: React.FC = () => {
 
               <Badge
                 label={squad.checkedIn ? 'CHECKED IN' : 'REGISTERED'}
-                variant={squad.checkedIn ? 'success' : 'secondary'}
+                variant={squad.checkedIn ? 'active' : 'upcoming'}
                 size="sm"
               />
             </View>
@@ -133,7 +133,7 @@ export const OrganizerSquadsScreen: React.FC = () => {
               ))}
             </View>
 
-            {/* Skills Badges */}
+            {/* Skills Badges (Category-Coded Chips) */}
             <View style={styles.skillsRow}>
               {squad.skills.map((s, idx) => (
                 <Badge key={idx} label={s} variant={getSkillBadgeVariant(s)} size="sm" />
@@ -144,7 +144,7 @@ export const OrganizerSquadsScreen: React.FC = () => {
             <View style={styles.actionsRow}>
               <Button
                 title={squad.checkedIn ? 'Undo Check-In' : 'Verify & Check-In Squad'}
-                variant={squad.checkedIn ? 'outline' : 'primary'}
+                variant={squad.checkedIn ? 'outlineOrganizer' : 'organizer'}
                 size="sm"
                 onPress={() => toggleCheckIn(squad.id)}
                 style={styles.checkInBtn}

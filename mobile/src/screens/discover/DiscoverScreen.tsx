@@ -327,15 +327,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   filterButtonActive: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primarySubtle,
+    borderColor: colors.student,
+    backgroundColor: colors.studentSubtle,
   },
   filterIcon: {
     ...typography.captionBold,
     color: colors.textSecondary,
   },
   filterIconActive: {
-    color: colors.primaryLight,
+    color: colors.student,
   },
   segmentBar: {
     flexDirection: 'row',
@@ -351,14 +351,15 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   segmentTabActive: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.student,
   },
   segmentText: {
     ...typography.captionBold,
     color: colors.textMuted,
   },
   segmentTextActive: {
-    color: colors.textPrimary,
+    color: colors.textDark,
+    fontWeight: '800',
   },
   listContent: {
     paddingHorizontal: spacing.md,

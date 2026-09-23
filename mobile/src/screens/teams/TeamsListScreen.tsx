@@ -51,14 +51,14 @@ export const TeamsListScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.headerActions}>
             <Button
               title="Scan QR"
-              leftIcon={<Icon name="qr" size={15} color={colors.secondaryLight} style={{ marginRight: 4 }} />}
+              leftIcon={<Icon name="qr" size={15} color={colors.studentAccent} style={{ marginRight: 4 }} />}
               variant="outline"
               size="sm"
               onPress={() => navigation.navigate('QRScanner')}
             />
             <Button
               title="Create"
-              leftIcon={<Icon name="teams" size={15} color={colors.textPrimary} style={{ marginRight: 4 }} />}
+              leftIcon={<Icon name="teams" size={15} color={colors.textDark} style={{ marginRight: 4 }} />}
               size="sm"
               onPress={() => navigation.navigate('CreateTeam')}
             />
@@ -72,8 +72,8 @@ export const TeamsListScreen: React.FC<Props> = ({ navigation }) => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
+            tintColor={colors.studentAccent}
+            colors={[colors.studentAccent]}
           />
         }
       >
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   },
   hackathonAffiliation: {
     ...typography.captionBold,
-    color: colors.secondaryLight,
+    color: colors.textMuted,
     marginBottom: spacing.xs,
   },
   description: {
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
   },
   viewRosterText: {
     ...typography.captionBold,
-    color: colors.primaryLight,
+    color: colors.studentAccent,
   },
   emptyCard: {
     padding: spacing.xl,

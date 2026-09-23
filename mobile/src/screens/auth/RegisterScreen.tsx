@@ -14,7 +14,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../navigation/types';
 import { registerSchema, RegisterFormData } from './validation';
 import { useAuthStore } from '../../store/authStore';
-import { Button, Input, Card } from '../../components/ui';
+import { Button, Input, Card, AppLogo } from '../../components/ui';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Register'>;
@@ -60,6 +60,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
+          <AppLogo size={64} style={{ marginBottom: spacing.md }} />
           <Text style={styles.brandTitle}>SkillSync</Text>
           <Text style={styles.subtitle}>Join Your Campus Innovation Network</Text>
         </View>
@@ -135,6 +136,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
               ]}
               onPress={() => setValue('role', 'student')}
             >
+              {selectedRole === 'student' && <View style={styles.studentDot} />}
               <Text
                 style={[
                   styles.roleText,
@@ -153,6 +155,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
               ]}
               onPress={() => setValue('role', 'organizer')}
             >
+              {selectedRole === 'organizer' && <View style={styles.organizerDot} />}
               <Text
                 style={[
                   styles.roleText,
@@ -199,7 +202,7 @@ const styles = StyleSheet.create({
   },
   brandTitle: {
     ...typography.h1,
-    color: colors.primaryLight,
+    color: colors.textPrimary,
   },
   subtitle: {
     ...typography.body,
@@ -246,15 +249,33 @@ const styles = StyleSheet.create({
     borderColor: colors.inputBorder,
     padding: spacing.xxs,
     marginBottom: spacing.md,
+    gap: spacing.xs,
   },
   roleOption: {
     flex: 1,
+    flexDirection: 'row',
     paddingVertical: spacing.sm,
     alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: borderRadius.sm,
+    gap: spacing.xs,
   },
   roleOptionActive: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.surfaceElevated,
+    borderWidth: 1,
+    borderColor: colors.surfaceBorderHighlight,
+  },
+  studentDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.studentAccent,
+  },
+  organizerDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.organizerAccent,
   },
   roleText: {
     ...typography.captionBold,
@@ -277,6 +298,6 @@ const styles = StyleSheet.create({
   },
   linkText: {
     ...typography.bodyBold,
-    color: colors.primaryLight,
+    color: colors.studentAccent,
   },
 });

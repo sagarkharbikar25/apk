@@ -146,9 +146,9 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: colors.primarySubtle,
-    borderWidth: 1.5,
-    borderColor: colors.primary,
+    backgroundColor: colors.surfaceElevated,
+    borderWidth: 1,
+    borderColor: colors.surfaceBorder,
     justifyContent: 'center',
     alignItems: 'center',
     marginVertical: spacing.md,
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
   },
   senderHighlight: {
     ...typography.bodyBold,
-    color: colors.primaryLight,
+    color: colors.studentAccent,
   },
   decisionBanner: {
     width: '100%',

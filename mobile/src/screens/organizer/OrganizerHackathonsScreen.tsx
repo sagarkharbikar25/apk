@@ -80,7 +80,7 @@ export const OrganizerHackathonsScreen: React.FC = () => {
           <Button
             title="+ Create"
             size="sm"
-            variant="secondary"
+            variant="organizer"
             onPress={() => setModalVisible(true)}
           />
         }
@@ -90,15 +90,15 @@ export const OrganizerHackathonsScreen: React.FC = () => {
         {/* Metrics Row */}
         <View style={styles.metricsRow}>
           <Card variant="elevated" style={styles.metricCard}>
-            <Text style={styles.metricValue}>{hackathons.length}</Text>
+            <Text style={[styles.metricValue, { color: colors.organizer }]}>{hackathons.length}</Text>
             <Text style={styles.metricLabel}>HOSTED EVENTS</Text>
           </Card>
           <Card variant="elevated" style={styles.metricCard}>
-            <Text style={styles.metricValue}>{totalHackers}</Text>
+            <Text style={[styles.metricValue, { color: colors.organizer }]}>{totalHackers}</Text>
             <Text style={styles.metricLabel}>REGISTERED HACKERS</Text>
           </Card>
           <Card variant="elevated" style={styles.metricCard}>
-            <Text style={styles.metricValue}>$125K</Text>
+            <Text style={[styles.metricValue, { color: colors.organizer }]}>$125K</Text>
             <Text style={styles.metricLabel}>TOTAL POOL</Text>
           </Card>
         </View>
@@ -115,7 +115,7 @@ export const OrganizerHackathonsScreen: React.FC = () => {
               </View>
               <Badge
                 label={hack.status.toUpperCase()}
-                variant={hack.status === 'active' ? 'success' : 'muted'}
+                variant={hack.status === 'active' ? 'active' : 'upcoming'}
                 size="sm"
               />
             </View>
@@ -150,7 +150,7 @@ export const OrganizerHackathonsScreen: React.FC = () => {
             <View style={styles.actionsRow}>
               <Button
                 title="View Registrations"
-                variant="outline"
+                variant="outlineOrganizer"
                 size="sm"
                 style={styles.actionBtn}
                 onPress={() => {}}
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
   },
   capacityFill: {
     height: 4,
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.organizer,
     borderRadius: 2,
   },
   actionsRow: {

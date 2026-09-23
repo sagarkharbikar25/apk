@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
   },
   hackathonBadge: {
     ...typography.captionBold,
-    color: colors.secondaryLight,
+    color: colors.textMuted,
     marginBottom: spacing.sm,
   },
   descText: {
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   },
   meterValue: {
     ...typography.captionBold,
-    color: colors.primaryLight,
+    color: colors.studentAccent,
   },
   meterBg: {
     height: 6,
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   },
   meterFill: {
     height: '100%',
-    backgroundColor: colors.primary,
+    backgroundColor: colors.studentAccent,
     borderRadius: borderRadius.full,
   },
   shareBtn: {
