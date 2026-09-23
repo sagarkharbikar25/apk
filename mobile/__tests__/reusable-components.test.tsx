@@ -26,8 +26,8 @@ describe('Splash & Reusable Components Unit Tests', () => {
       const subtitle = texts.find((t: any) => t.props.children === 'Matching hackathon profiles');
       expect(subtitle).toBeTruthy();
 
-      const spinner = testRenderer.root.findByType(ActivityIndicator);
-      expect(spinner).toBeTruthy();
+      const brandBadge = texts.find((t: any) => t.props.children === 'SYNCHRONIZING');
+      expect(brandBadge).toBeTruthy();
     });
   });
 
