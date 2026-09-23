@@ -7,7 +7,14 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   async onModuleInit() {
-    await this.$connect();
+    try {
+      await this.$connect();
+    } catch (err: any) {
+      console.warn(
+        '[PrismaService] Database connection deferred/offline. Running in resilient mode.',
+        err?.message || err,
+      );
+    }
   }
 
   async onModuleDestroy() {
