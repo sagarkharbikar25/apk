@@ -25,6 +25,7 @@ export const registerSchema = z.object({
     .string()
     .min(6, 'Password must be at least 6 characters long'),
   role: z.enum(['student', 'organizer']),
+  organizerCode: z.string().optional(),
 });
 
 export type RegisterFormData = z.infer<typeof registerSchema>;

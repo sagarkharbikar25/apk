@@ -164,6 +164,24 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
             </TouchableOpacity>
           </View>
 
+          {selectedRole === 'organizer' && (
+            <Controller
+              control={control}
+              name="organizerCode"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label="Organizer Invite Code"
+                  placeholder="Enter secret invite code"
+                  autoCapitalize="characters"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={errors.organizerCode?.message}
+                />
+              )}
+            />
+          )}
+
           <Button
             title="Create Account"
             onPress={() => handleSubmit(onSubmit)()}

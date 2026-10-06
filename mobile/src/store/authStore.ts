@@ -13,7 +13,13 @@ export interface AuthState {
 
   // Actions
   login: (email: string, password: string) => Promise<boolean>;
-  register: (data: { name: string; email: string; password: string; role: 'student' | 'organizer' }) => Promise<{ success: boolean; requiresVerification: boolean }>;
+  register: (data: {
+    name: string;
+    email: string;
+    password: string;
+    role: 'student' | 'organizer';
+    organizerCode?: string;
+  }) => Promise<{ success: boolean; requiresVerification: boolean }>;
   verifyEmail: (email: string, otp: string) => Promise<boolean>;
   resendOtp: (email: string) => Promise<boolean>;
   logout: () => void;
@@ -106,8 +112,11 @@ export const useAuthStore = create<AuthState>((set, get) => {
       set({ isLoading: true, error: null });
       try {
         const response = await apiClient.post('/auth/register', {
-          ...data,
           email: data.email.trim().toLowerCase(),
+          password: data.password,
+          displayName: data.name,
+          role: data.role,
+          organizerCode: data.organizerCode,
         });
 
         set({

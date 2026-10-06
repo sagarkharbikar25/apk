@@ -40,12 +40,15 @@ export const setupApiClientAuth = (
   onAuthFailedCallback = onFail;
 };
 
-// Request Interceptor: Attach JWT Bearer Token
+// Request Interceptor: Attach JWT Bearer Token & ensure /api/v1 prefix
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const { accessToken } = tokenProvider();
     if (accessToken && !config.headers.Authorization) {
       config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    if (config.url && !config.url.startsWith('/api/v1') && !config.baseURL?.includes('/api/v1')) {
+      config.url = `/api/v1${config.url.startsWith('/') ? '' : '/'}${config.url}`;
     }
     return config;
   },
