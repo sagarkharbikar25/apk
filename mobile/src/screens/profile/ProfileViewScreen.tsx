@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
   },
   availabilityValue: {
     ...typography.captionBold,
-    color: colors.studentAccent,
+    color: colors.primaryLight,
   },
   progressBarBg: {
     height: 6,
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: colors.studentAccent,
+    backgroundColor: colors.primary,
     borderRadius: borderRadius.full,
   },
   sectionCard: {
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
   },
   linkText: {
     ...typography.captionBold,
-    color: colors.studentAccent,
+    color: colors.secondaryLight,
   },
   skillsHeader: {
     flexDirection: 'row',

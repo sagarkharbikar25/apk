@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { colors, typography, spacing, borderRadius } from '../../theme';
-import { Card, Button, Badge, QRCodeView } from '../../components/ui';
+import { Card, Button, Badge } from '../../components/ui';
 
 interface QRShareModalProps {
   visible: boolean;
@@ -52,19 +52,26 @@ export const QRShareModal: React.FC<QRShareModalProps> = ({
             Have your teammate scan this code with their device camera to join instantly.
           </Text>
 
-          {/* Real Scannable 2D QR Code */}
-          <View style={styles.qrWrapper}>
-            <QRCodeView
-              value={joinDeepLink}
-              size={180}
-              backgroundColor="#FFFFFF"
-              color="#0E0F12"
-            />
+          {/* High-Contrast QR Code Visual */}
+          <View style={styles.qrContainer}>
+            <View style={styles.qrCornerTL} />
+            <View style={styles.qrCornerTR} />
+            <View style={styles.qrCornerBL} />
+            <View style={styles.qrCornerBR} />
+
+            <View style={styles.qrGrid}>
+              <View style={styles.qrEyeTL} />
+              <View style={styles.qrEyeTR} />
+              <View style={styles.qrEyeBL} />
+              <View style={styles.qrCenterGraphic}>
+                <Text style={styles.qrLogoIcon}>⚡</Text>
+              </View>
+            </View>
           </View>
 
           <Badge
-            label="⏱ Valid for 24 Hours • Redis Signed"
-            variant="neutral"
+            label="⏱ Valid for 24 Hours • Redis Signed Token"
+            variant="primary"
             size="sm"
             style={styles.expiryBadge}
           />
@@ -78,13 +85,13 @@ export const QRShareModal: React.FC<QRShareModalProps> = ({
           <View style={styles.actions}>
             <Button
               title={copied ? '✓ Link Copied!' : 'Copy Invitation Link'}
-              variant="student"
+              variant={copied ? 'secondary' : 'primary'}
               onPress={handleCopy}
               style={styles.copyBtn}
             />
             <Button
               title="Close"
-              variant="link"
+              variant="outline"
               onPress={onClose}
               style={styles.closeActionBtn}
             />
@@ -107,9 +114,6 @@ const styles = StyleSheet.create({
     width: '100%',
     padding: spacing.xl,
     alignItems: 'center',
-    backgroundColor: colors.surfaceCard,
-    borderWidth: 1,
-    borderColor: colors.surfaceBorder,
   },
   header: {
     flexDirection: 'row',
@@ -126,12 +130,12 @@ const styles = StyleSheet.create({
     padding: spacing.xs,
   },
   closeText: {
-    fontSize: 16,
+    ...typography.h3,
     color: colors.textMuted,
   },
   teamName: {
     ...typography.h2,
-    color: colors.student,
+    color: colors.primaryLight,
     textAlign: 'center',
     marginTop: spacing.xs,
   },
@@ -142,13 +146,101 @@ const styles = StyleSheet.create({
     marginVertical: spacing.sm,
     maxWidth: 280,
   },
-  qrWrapper: {
-    padding: spacing.md,
+  qrContainer: {
+    width: 200,
+    height: 200,
     backgroundColor: '#FFFFFF',
-    borderRadius: borderRadius.md,
-    marginVertical: spacing.md,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
     alignItems: 'center',
     justifyContent: 'center',
+    marginVertical: spacing.md,
+    position: 'relative',
+  },
+  qrCornerTL: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    width: 24,
+    height: 24,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+    borderColor: '#000000',
+  },
+  qrCornerTR: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    width: 24,
+    height: 24,
+    borderTopWidth: 4,
+    borderRightWidth: 4,
+    borderColor: '#000000',
+  },
+  qrCornerBL: {
+    position: 'absolute',
+    bottom: 12,
+    left: 12,
+    width: 24,
+    height: 24,
+    borderBottomWidth: 4,
+    borderLeftWidth: 4,
+    borderColor: '#000000',
+  },
+  qrCornerBR: {
+    position: 'absolute',
+    bottom: 12,
+    right: 12,
+    width: 24,
+    height: 24,
+    borderBottomWidth: 4,
+    borderRightWidth: 4,
+    borderColor: '#000000',
+  },
+  qrGrid: {
+    width: 140,
+    height: 140,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  qrEyeTL: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    width: 32,
+    height: 32,
+    backgroundColor: '#000000',
+    borderRadius: 6,
+  },
+  qrEyeTR: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 32,
+    height: 32,
+    backgroundColor: '#000000',
+    borderRadius: 6,
+  },
+  qrEyeBL: {
+    position: 'absolute',
+    bottom: 10,
+    left: 10,
+    width: 32,
+    height: 32,
+    backgroundColor: '#000000',
+    borderRadius: 6,
+  },
+  qrCenterGraphic: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  qrLogoIcon: {
+    fontSize: 20,
+    color: '#FFFFFF',
   },
   expiryBadge: {
     marginVertical: spacing.xs,
@@ -157,7 +249,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.inputBackground,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs + 2,
-    borderRadius: borderRadius.sm,
+    borderRadius: borderRadius.md,
     borderWidth: 1,
     borderColor: colors.inputBorder,
     width: '100%',
@@ -170,7 +262,7 @@ const styles = StyleSheet.create({
   },
   actions: {
     width: '100%',
-    gap: spacing.sm,
+    gap: spacing.xs,
     marginTop: spacing.sm,
   },
   copyBtn: {

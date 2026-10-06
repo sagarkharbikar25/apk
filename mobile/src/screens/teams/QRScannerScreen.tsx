@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  PermissionsAndroid,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { TeamsStackParamList } from '../../navigation/types';
@@ -21,48 +20,20 @@ export const QRScannerScreen: React.FC<Props> = ({ navigation }) => {
   const { joinTeamWithQr, isLoading, error } = useTeamsStore();
   const [manualToken, setManualToken] = useState('');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
 
   const laserAnim = useRef(new Animated.Value(0)).current;
-
-  // Request Android Camera Permission on mount
-  useEffect(() => {
-    const requestCameraPermission = async () => {
-      if (Platform.OS === 'android') {
-        try {
-          const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.CAMERA,
-            {
-              title: 'Camera Permission Required',
-              message: 'SkillSync needs access to your camera to scan team QR codes.',
-              buttonNeutral: 'Ask Me Later',
-              buttonNegative: 'Cancel',
-              buttonPositive: 'OK',
-            }
-          );
-          setHasCameraPermission(granted === PermissionsAndroid.RESULTS.GRANTED);
-        } catch (_err) {
-          setHasCameraPermission(false);
-        }
-      } else {
-        setHasCameraPermission(true);
-      }
-    };
-
-    requestCameraPermission();
-  }, []);
 
   useEffect(() => {
     const scanLoop = Animated.loop(
       Animated.sequence([
         Animated.timing(laserAnim, {
-          toValue: 210,
-          duration: 1600,
+          toValue: 220,
+          duration: 1500,
           useNativeDriver: true,
         }),
         Animated.timing(laserAnim, {
           toValue: 0,
-          duration: 1600,
+          duration: 1500,
           useNativeDriver: true,
         }),
       ])
@@ -72,6 +43,7 @@ export const QRScannerScreen: React.FC<Props> = ({ navigation }) => {
   }, [laserAnim]);
 
   const handleProcessToken = async (rawCode: string) => {
+    // Extract token from skillsync://join/team/{token} or use raw string
     let token = rawCode.trim();
     if (token.includes('/join/team/')) {
       const parts = token.split('/join/team/');
@@ -80,6 +52,7 @@ export const QRScannerScreen: React.FC<Props> = ({ navigation }) => {
 
     if (!token) return;
 
+    // Use default team ID or extracted target
     const result = await joinTeamWithQr('tm-1', token);
     if (result.success) {
       setSuccessMessage('Successfully joined the team! Redirecting...');
@@ -118,11 +91,7 @@ export const QRScannerScreen: React.FC<Props> = ({ navigation }) => {
 
           <View style={styles.viewfinderCenter}>
             <Text style={styles.viewfinderIcon}>📷</Text>
-            <Text style={styles.viewfinderHint}>
-              {hasCameraPermission === false
-                ? 'Camera Ready • Align Code'
-                : 'Camera Active • Scanning'}
-            </Text>
+            <Text style={styles.viewfinderHint}>Camera Scanner Ready</Text>
           </View>
         </View>
 
@@ -138,7 +107,7 @@ export const QRScannerScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         ) : null}
 
-        {/* Manual Code Entry & Simulation */}
+        {/* Quick Simulation / Manual Code Entry */}
         <Card variant="elevated" style={styles.manualCard}>
           <Text style={styles.manualTitle}>Manual Code / Simulation</Text>
           <Text style={styles.manualSubtitle}>
@@ -146,7 +115,7 @@ export const QRScannerScreen: React.FC<Props> = ({ navigation }) => {
           </Text>
 
           <Input
-            placeholder="e.g. qr-token-xyz-789"
+            placeholder="e.g. qr-token-abc-123"
             value={manualToken}
             onChangeText={setManualToken}
             containerStyle={styles.inputContainer}
@@ -155,15 +124,14 @@ export const QRScannerScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.quickButtons}>
             <TouchableOpacity
               style={styles.simulatePill}
-              onPress={() => handleProcessToken('qr-token-xyz-789')}
+              onPress={() => handleProcessToken('qr-token-abc-123')}
             >
-              <Badge label="⚡ Simulate Valid QR Scan" variant="neutral" size="sm" />
+              <Badge label="⚡ Simulate Valid QR Scan" variant="primary" size="sm" />
             </TouchableOpacity>
           </View>
 
           <Button
             title="Join Team"
-            variant="student"
             onPress={() => handleProcessToken(manualToken)}
             isLoading={isLoading}
             disabled={!manualToken.trim()}
@@ -189,8 +157,8 @@ const styles = StyleSheet.create({
   viewfinder: {
     width: 250,
     height: 250,
-    backgroundColor: '#16181C',
-    borderRadius: borderRadius.md,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    borderRadius: borderRadius.lg,
     borderWidth: 1,
     borderColor: colors.surfaceBorder,
     alignItems: 'center',
@@ -202,84 +170,84 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-    width: 24,
-    height: 24,
-    borderTopWidth: 3,
-    borderLeftWidth: 3,
-    borderColor: colors.student,
-    borderTopLeftRadius: borderRadius.sm,
+    width: 30,
+    height: 30,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+    borderColor: colors.secondary,
+    borderTopLeftRadius: borderRadius.md,
   },
   cornerTR: {
     position: 'absolute',
     top: 0,
     right: 0,
-    width: 24,
-    height: 24,
-    borderTopWidth: 3,
-    borderRightWidth: 3,
-    borderColor: colors.student,
-    borderTopRightRadius: borderRadius.sm,
+    width: 30,
+    height: 30,
+    borderTopWidth: 4,
+    borderRightWidth: 4,
+    borderColor: colors.secondary,
+    borderTopRightRadius: borderRadius.md,
   },
   cornerBL: {
     position: 'absolute',
     bottom: 0,
     left: 0,
-    width: 24,
-    height: 24,
-    borderBottomWidth: 3,
-    borderLeftWidth: 3,
-    borderColor: colors.student,
-    borderBottomLeftRadius: borderRadius.sm,
+    width: 30,
+    height: 30,
+    borderBottomWidth: 4,
+    borderLeftWidth: 4,
+    borderColor: colors.secondary,
+    borderBottomLeftRadius: borderRadius.md,
   },
   cornerBR: {
     position: 'absolute',
     bottom: 0,
     right: 0,
-    width: 24,
-    height: 24,
-    borderBottomWidth: 3,
-    borderRightWidth: 3,
-    borderColor: colors.student,
-    borderBottomRightRadius: borderRadius.sm,
+    width: 30,
+    height: 30,
+    borderBottomWidth: 4,
+    borderRightWidth: 4,
+    borderColor: colors.secondary,
+    borderBottomRightRadius: borderRadius.md,
   },
   laserLine: {
     position: 'absolute',
     left: 10,
     right: 10,
-    height: 2,
-    backgroundColor: colors.student,
+    height: 3,
+    backgroundColor: colors.secondary,
+    borderRadius: borderRadius.full,
     top: 15,
   },
   viewfinderCenter: {
     alignItems: 'center',
   },
   viewfinderIcon: {
-    fontSize: 32,
+    fontSize: 36,
     marginBottom: spacing.xs,
   },
   viewfinderHint: {
-    ...typography.caption,
+    ...typography.captionBold,
     color: colors.textSecondary,
-    fontSize: 12,
   },
   successBanner: {
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: colors.successSubtle,
     borderWidth: 1,
-    borderColor: colors.student,
-    borderRadius: borderRadius.sm,
+    borderColor: colors.success,
+    borderRadius: borderRadius.md,
     padding: spacing.md,
     width: '100%',
   },
   successText: {
     ...typography.captionBold,
-    color: colors.student,
+    color: colors.success,
     textAlign: 'center',
   },
   errorBanner: {
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: colors.errorSubtle,
     borderWidth: 1,
     borderColor: colors.error,
-    borderRadius: borderRadius.sm,
+    borderRadius: borderRadius.md,
     padding: spacing.md,
     width: '100%',
   },
@@ -291,9 +259,6 @@ const styles = StyleSheet.create({
   manualCard: {
     width: '100%',
     padding: spacing.lg,
-    backgroundColor: colors.surfaceCard,
-    borderWidth: 1,
-    borderColor: colors.surfaceBorder,
   },
   manualTitle: {
     ...typography.h3,

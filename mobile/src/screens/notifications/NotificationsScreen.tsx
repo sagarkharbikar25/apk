@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   unreadCard: {
-    borderColor: colors.studentAccent,
+    borderColor: colors.primary,
     backgroundColor: colors.surfaceElevated,
   },
   notifRow: {
@@ -190,9 +190,9 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: colors.primarySubtle,
     borderWidth: 1,
-    borderColor: colors.surfaceBorder,
+    borderColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.md,
@@ -214,10 +214,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   unreadDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.studentAccent,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.primaryLight,
     marginLeft: spacing.xs,
   },
   bodyText: {

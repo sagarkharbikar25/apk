@@ -207,15 +207,15 @@ const styles = StyleSheet.create({
     borderColor: colors.inputBorder,
   },
   pillActive: {
-    borderColor: colors.studentAccent,
-    backgroundColor: colors.surfaceElevated,
+    borderColor: colors.primary,
+    backgroundColor: colors.primarySubtle,
   },
   pillText: {
     ...typography.captionBold,
     color: colors.textMuted,
   },
   pillTextActive: {
-    color: colors.studentAccent,
+    color: colors.primaryLight,
   },
   actionsRow: {
     flexDirection: 'row',

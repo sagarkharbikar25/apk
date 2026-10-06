@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   TextInput,
@@ -8,8 +8,6 @@ import {
   TouchableOpacity,
   ViewStyle,
   TextStyle,
-  Animated,
-  Platform,
 } from 'react-native';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 
@@ -40,83 +38,18 @@ export const Input: React.FC<InputProps> = ({
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const glowAnim = useRef(new Animated.Value(0)).current;
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-  const pulseRef = useRef<Animated.CompositeAnimation | null>(null);
 
   const isSecured = isPassword ? !showPassword : secureTextEntry;
-
-  useEffect(() => {
-    if (isFocused) {
-      // Fade in glow
-      Animated.timing(glowAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
-
-      // Start subtle pulse loop
-      const pulse = Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 0.6,
-            duration: 1500,
-            useNativeDriver: false,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 1500,
-            useNativeDriver: false,
-          }),
-        ]),
-      );
-      pulseRef.current = pulse;
-      pulse.start();
-    } else {
-      // Stop pulse and fade out glow
-      pulseRef.current?.stop();
-      Animated.timing(glowAnim, {
-        toValue: 0,
-        duration: 250,
-        useNativeDriver: false,
-      }).start();
-    }
-  }, [isFocused, glowAnim, pulseAnim]);
-
-  const glowOpacity = Animated.multiply(glowAnim, pulseAnim);
-
-  const animatedBorderColor = glowAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [error ? colors.error : colors.inputBorder, error ? colors.error : colors.studentAccent],
-  });
-
-  const animatedShadowOpacity = glowOpacity.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 0.45],
-  });
 
   return (
     <View style={[styles.container, containerStyle]}>
       {label && <Text style={styles.label}>{label}</Text>}
 
-      <Animated.View
+      <View
         style={[
           styles.inputContainer,
+          isFocused && styles.inputFocused,
           error ? styles.inputError : null,
-          {
-            borderColor: animatedBorderColor,
-            ...(Platform.OS === 'ios'
-              ? {
-                  shadowColor: error ? colors.error : colors.studentAccent,
-                  shadowOffset: { width: 0, height: 0 },
-                  shadowOpacity: animatedShadowOpacity as unknown as number,
-                  shadowRadius: 10,
-                }
-              : {}),
-          },
-          Platform.OS === 'android' && isFocused && !error
-            ? styles.androidGlow
-            : null,
         ]}
       >
         {leftIcon && <View style={styles.iconContainer}>{leftIcon}</View>}
@@ -148,7 +81,7 @@ export const Input: React.FC<InputProps> = ({
         )}
 
         {!isPassword && rightIcon && <View style={styles.iconContainer}>{rightIcon}</View>}
-      </Animated.View>
+      </View>
 
       {error ? (
         <Text style={styles.errorText}>{error}</Text>
@@ -165,34 +98,33 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   label: {
-    ...typography.caption,
+    ...typography.captionBold,
     color: colors.textSecondary,
     marginBottom: spacing.xs,
     textTransform: 'uppercase',
-    letterSpacing: 1,
-    fontSize: 11,
+    letterSpacing: 0.5,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.inputBackground, // #16181C
-    borderWidth: 1.5,
-    borderColor: colors.inputBorder, // #24262B
-    borderRadius: borderRadius.sm,
+    backgroundColor: colors.inputBackground,
+    borderWidth: 1,
+    borderColor: colors.inputBorder,
+    borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
-    minHeight: 46,
+    minHeight: 48,
+  },
+  inputFocused: {
+    borderColor: colors.inputFocusBorder,
+    backgroundColor: colors.surface,
   },
   inputError: {
     borderColor: colors.error,
   },
-  androidGlow: {
-    elevation: 8,
-    shadowColor: colors.studentAccent,
-  },
   input: {
     flex: 1,
     ...typography.body,
-    color: colors.textPrimary, // #EDEFF2
+    color: colors.textPrimary,
     paddingVertical: spacing.sm,
   },
   iconContainer: {
@@ -205,10 +137,9 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   eyeText: {
-    ...typography.caption,
-    color: colors.textSecondary,
+    ...typography.captionBold,
+    color: colors.primaryLight,
     fontSize: 11,
-    letterSpacing: 0.5,
   },
   errorText: {
     ...typography.caption,
@@ -221,4 +152,3 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
 });
-

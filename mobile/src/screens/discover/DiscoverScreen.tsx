@@ -14,7 +14,6 @@ import { Input, Button, Card, SkeletonLoader, IconButton, Icon } from '../../com
 import { colors, typography, spacing, borderRadius } from '../../theme';
 import { RecommendationCard } from './RecommendationCard';
 import { FilterModal, FilterCriteria } from './FilterModal';
-import { InviteModal } from './InviteModal';
 
 const DEFAULT_RECOMMENDATIONS: RecommendationItem[] = [
   {
@@ -140,8 +139,6 @@ export const DiscoverScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
-  const [selectedInviteItem, setSelectedInviteItem] = useState<RecommendationItem | null>(null);
-  const [invitedIds, setInvitedIds] = useState<Record<string, boolean>>({});
   const [criteria, setCriteria] = useState<FilterCriteria>({
     type: 'all',
     category: 'All',
@@ -149,26 +146,12 @@ export const DiscoverScreen: React.FC = () => {
     minHours: 0,
   });
 
-  const handleConnect = (item: RecommendationItem) => {
-    setSelectedInviteItem(item);
-  };
-
-  const handleInviteSuccess = (itemId: string) => {
-    setInvitedIds((prev) => ({ ...prev, [itemId]: true }));
-  };
-
   const fetchRecommendations = async () => {
     setIsLoading(true);
     try {
       const response = await apiClient.get<RecommendationItem[]>('/recommendations');
       if (Array.isArray(response.data) && response.data.length > 0) {
-        // Merge real backend recommendations with dummy items (real items prioritized)
-        const realIds = new Set(response.data.map((r) => r.id));
-        const merged = [
-          ...response.data,
-          ...DEFAULT_RECOMMENDATIONS.filter((d) => !realIds.has(d.id)),
-        ];
-        setItems(merged);
+        setItems(response.data);
       } else {
         setItems(DEFAULT_RECOMMENDATIONS);
       }
@@ -277,15 +260,14 @@ export const DiscoverScreen: React.FC = () => {
             title="Reset Filters"
             variant="outline"
             size="sm"
-            onPress={() => {
-              setSearch('');
+            onPress={() =>
               setCriteria({
                 type: 'all',
                 category: 'All',
                 minScore: 0,
                 minHours: 0,
-              });
-            }}
+              })
+            }
             style={styles.resetBtn}
           />
         </Card>
@@ -293,13 +275,7 @@ export const DiscoverScreen: React.FC = () => {
         <FlashList
           data={filteredItems}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <RecommendationCard
-              item={item}
-              onConnect={handleConnect}
-              isInvited={Boolean(invitedIds[item.id])}
-            />
-          )}
+          renderItem={({ item }) => <RecommendationCard item={item} />}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl
@@ -317,13 +293,6 @@ export const DiscoverScreen: React.FC = () => {
         onClose={() => setFilterModalVisible(false)}
         criteria={criteria}
         onApply={(newCriteria) => setCriteria(newCriteria)}
-      />
-
-      <InviteModal
-        visible={!!selectedInviteItem}
-        item={selectedInviteItem}
-        onClose={() => setSelectedInviteItem(null)}
-        onSuccess={handleInviteSuccess}
       />
     </View>
   );
@@ -358,15 +327,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   filterButtonActive: {
-    borderColor: colors.student,
-    backgroundColor: colors.studentSubtle,
+    borderColor: colors.primary,
+    backgroundColor: colors.primarySubtle,
   },
   filterIcon: {
     ...typography.captionBold,
     color: colors.textSecondary,
   },
   filterIconActive: {
-    color: colors.student,
+    color: colors.primaryLight,
   },
   segmentBar: {
     flexDirection: 'row',
@@ -382,15 +351,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   segmentTabActive: {
-    backgroundColor: colors.student,
+    backgroundColor: colors.primary,
   },
   segmentText: {
     ...typography.captionBold,
     color: colors.textMuted,
   },
   segmentTextActive: {
-    color: colors.textDark,
-    fontWeight: '800',
+    color: colors.textPrimary,
   },
   listContent: {
     paddingHorizontal: spacing.md,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Modal,
   View,
@@ -26,7 +26,7 @@ export const RegisterHackathonModal: React.FC<RegisterHackathonModalProps> = ({
   hackathonTitle,
   maxTeamSize,
 }) => {
-  const { registerForHackathon, isRegistering, error, clearError } = useHackathonsStore();
+  const { registerForHackathon, isRegistering, error } = useHackathonsStore();
   const { teams } = useTeamsStore();
 
   const [registerType, setRegisterType] = useState<'individual' | 'team'>('team');
@@ -34,18 +34,6 @@ export const RegisterHackathonModal: React.FC<RegisterHackathonModalProps> = ({
     teams.length > 0 ? teams[0].id : null
   );
   const [success, setSuccess] = useState(false);
-
-  useEffect(() => {
-    if (visible) {
-      clearError();
-      setSuccess(false);
-    }
-  }, [visible, clearError]);
-
-  const handleSelectType = (type: 'individual' | 'team') => {
-    clearError();
-    setRegisterType(type);
-  };
 
   const handleRegister = async () => {
     const res = await registerForHackathon(
@@ -106,7 +94,7 @@ export const RegisterHackathonModal: React.FC<RegisterHackathonModalProps> = ({
                 styles.typePill,
                 registerType === 'team' && styles.typePillActive,
               ]}
-              onPress={() => handleSelectType('team')}
+              onPress={() => setRegisterType('team')}
             >
               <Text
                 style={[
@@ -124,7 +112,7 @@ export const RegisterHackathonModal: React.FC<RegisterHackathonModalProps> = ({
                 styles.typePill,
                 registerType === 'individual' && styles.typePillActive,
               ]}
-              onPress={() => handleSelectType('individual')}
+              onPress={() => setRegisterType('individual')}
             >
               <Text
                 style={[
@@ -283,15 +271,15 @@ const styles = StyleSheet.create({
     borderColor: colors.inputBorder,
   },
   typePillActive: {
-    borderColor: colors.studentAccent,
-    backgroundColor: colors.surfaceElevated,
+    borderColor: colors.primary,
+    backgroundColor: colors.primarySubtle,
   },
   typeText: {
     ...typography.captionBold,
     color: colors.textMuted,
   },
   typeTextActive: {
-    color: colors.studentAccent,
+    color: colors.primaryLight,
   },
   teamSelectSection: {
     marginBottom: spacing.md,
@@ -315,15 +303,15 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   teamOptionActive: {
-    borderColor: colors.studentAccent,
-    backgroundColor: colors.surfaceElevated,
+    borderColor: colors.primary,
+    backgroundColor: colors.primarySubtle,
   },
   teamOptionText: {
     ...typography.captionBold,
     color: colors.textSecondary,
   },
   teamOptionTextActive: {
-    color: colors.studentAccent,
+    color: colors.primaryLight,
   },
   actions: {
     flexDirection: 'row',

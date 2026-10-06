@@ -31,7 +31,7 @@ export const CreateTeamScreen: React.FC<Props> = ({ navigation }) => {
     const team = await createTeam({
       name: name.trim(),
       description: description.trim(),
-      projectId: hackathonId.trim() || undefined,
+      hackathonId: hackathonId.trim() || undefined,
       maxMembers,
     });
 
@@ -176,15 +176,15 @@ const styles = StyleSheet.create({
     borderColor: colors.inputBorder,
   },
   capacityPillActive: {
-    borderColor: colors.studentAccent,
-    backgroundColor: colors.surfaceElevated,
+    borderColor: colors.primary,
+    backgroundColor: colors.primarySubtle,
   },
   capacityText: {
     ...typography.captionBold,
     color: colors.textMuted,
   },
   capacityTextActive: {
-    color: colors.studentAccent,
+    color: colors.primaryLight,
   },
   capacityHint: {
     ...typography.caption,

@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     ...typography.captionBold,
-    color: colors.studentAccent,
+    color: colors.primaryLight,
   },
   closeBtn: {
     padding: spacing.xs,
@@ -212,18 +212,18 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full,
     borderWidth: 1,
     borderColor: colors.surfaceBorder,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: colors.surface,
   },
   chipSelected: {
-    borderColor: colors.studentAccent,
-    backgroundColor: colors.surfaceElevated,
+    borderColor: colors.primary,
+    backgroundColor: colors.primarySubtle,
   },
   chipText: {
     ...typography.captionBold,
     color: colors.textSecondary,
   },
   chipTextSelected: {
-    color: colors.studentAccent,
+    color: colors.primaryLight,
   },
   actionRow: {
     flexDirection: 'row',

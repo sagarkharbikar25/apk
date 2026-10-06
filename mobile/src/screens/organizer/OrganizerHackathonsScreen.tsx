@@ -52,39 +52,6 @@ export const OrganizerHackathonsScreen: React.FC = () => {
   const [newPrize, setNewPrize] = useState('$30,000');
   const [newCapacity, setNewCapacity] = useState('500');
 
-  const [selectedForRoster, setSelectedForRoster] = useState<HostedHackathon | null>(null);
-  const [editingHackathon, setEditingHackathon] = useState<HostedHackathon | null>(null);
-  const [editTitle, setEditTitle] = useState('');
-  const [editOrg, setEditOrg] = useState('');
-  const [editPrize, setEditPrize] = useState('');
-  const [editCapacity, setEditCapacity] = useState('');
-
-  const handleOpenEdit = (hack: HostedHackathon) => {
-    setEditingHackathon(hack);
-    setEditTitle(hack.title);
-    setEditOrg(hack.organization);
-    setEditPrize(hack.prizePool.replace(' in Prizes', ''));
-    setEditCapacity(String(hack.capacity));
-  };
-
-  const handleSaveEdit = () => {
-    if (!editingHackathon || !editTitle.trim()) return;
-    setHackathons((prev) =>
-      prev.map((h) =>
-        h.id === editingHackathon.id
-          ? {
-              ...h,
-              title: editTitle.trim(),
-              organization: editOrg.trim() || h.organization,
-              prizePool: `${editPrize.trim()} in Prizes`,
-              capacity: parseInt(editCapacity, 10) || h.capacity,
-            }
-          : h
-      )
-    );
-    setEditingHackathon(null);
-  };
-
   const handleCreateHackathon = () => {
     if (!newTitle.trim()) return;
     const newEntry: HostedHackathon = {
@@ -113,7 +80,7 @@ export const OrganizerHackathonsScreen: React.FC = () => {
           <Button
             title="+ Create"
             size="sm"
-            variant="organizer"
+            variant="secondary"
             onPress={() => setModalVisible(true)}
           />
         }
@@ -123,15 +90,15 @@ export const OrganizerHackathonsScreen: React.FC = () => {
         {/* Metrics Row */}
         <View style={styles.metricsRow}>
           <Card variant="elevated" style={styles.metricCard}>
-            <Text style={[styles.metricValue, { color: colors.organizer }]}>{hackathons.length}</Text>
+            <Text style={styles.metricValue}>{hackathons.length}</Text>
             <Text style={styles.metricLabel}>HOSTED EVENTS</Text>
           </Card>
           <Card variant="elevated" style={styles.metricCard}>
-            <Text style={[styles.metricValue, { color: colors.organizer }]}>{totalHackers}</Text>
+            <Text style={styles.metricValue}>{totalHackers}</Text>
             <Text style={styles.metricLabel}>REGISTERED HACKERS</Text>
           </Card>
           <Card variant="elevated" style={styles.metricCard}>
-            <Text style={[styles.metricValue, { color: colors.organizer }]}>$125K</Text>
+            <Text style={styles.metricValue}>$125K</Text>
             <Text style={styles.metricLabel}>TOTAL POOL</Text>
           </Card>
         </View>
@@ -148,7 +115,7 @@ export const OrganizerHackathonsScreen: React.FC = () => {
               </View>
               <Badge
                 label={hack.status.toUpperCase()}
-                variant={hack.status === 'active' ? 'active' : 'upcoming'}
+                variant={hack.status === 'active' ? 'success' : 'muted'}
                 size="sm"
               />
             </View>
@@ -183,17 +150,17 @@ export const OrganizerHackathonsScreen: React.FC = () => {
             <View style={styles.actionsRow}>
               <Button
                 title="View Registrations"
-                variant="outlineOrganizer"
+                variant="outline"
                 size="sm"
                 style={styles.actionBtn}
-                onPress={() => setSelectedForRoster(hack)}
+                onPress={() => {}}
               />
               <Button
                 title="Edit Settings"
                 variant="ghost"
                 size="sm"
                 style={styles.actionBtn}
-                onPress={() => handleOpenEdit(hack)}
+                onPress={() => {}}
               />
             </View>
           </Card>
@@ -254,134 +221,6 @@ export const OrganizerHackathonsScreen: React.FC = () => {
           </Card>
         </View>
       </Modal>
-
-      {/* View Registrations Roster Modal */}
-      {selectedForRoster && (
-        <Modal visible={!!selectedForRoster} transparent={true} animationType="slide">
-          <View style={styles.modalOverlay}>
-            <Card variant="elevated" style={styles.modalCard}>
-              <View style={styles.modalHeader}>
-                <View style={{ flex: 1, marginRight: 8 }}>
-                  <Text style={styles.modalTitle} numberOfLines={1}>
-                    {selectedForRoster.title}
-                  </Text>
-                  <Text style={styles.orgText}>Roster & Registration Overview</Text>
-                </View>
-                <TouchableOpacity onPress={() => setSelectedForRoster(null)}>
-                  <Icon name="close" size={18} color={colors.textSecondary} />
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.detailsRow}>
-                <View style={styles.detailPill}>
-                  <Text style={styles.detailLabel}>Registered Hackers</Text>
-                  <Text style={[styles.detailText, { color: colors.organizer }]}>
-                    {selectedForRoster.registeredCount} / {selectedForRoster.capacity}
-                  </Text>
-                </View>
-                <View style={styles.detailPill}>
-                  <Text style={styles.detailLabel}>Event Status</Text>
-                  <Text style={[styles.detailText, { color: colors.success }]}>
-                    {selectedForRoster.status.toUpperCase()}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.capacityBar}>
-                <View
-                  style={[
-                    styles.capacityFill,
-                    {
-                      width: `${Math.min(
-                        100,
-                        (selectedForRoster.registeredCount / selectedForRoster.capacity) * 100
-                      )}%`,
-                    },
-                  ]}
-                />
-              </View>
-
-              <Text style={[styles.detailLabel, { marginBottom: 6 }]}>REGISTERED SQUADS SUMMARY</Text>
-              <Text style={styles.orgText}>
-                • VectorPulse Hackers (4/4 hackers - Checked In)
-              </Text>
-              <Text style={styles.orgText}>
-                • ZeroKnowledge Guild (3/4 hackers - Pending Check-In)
-              </Text>
-              <Text style={[styles.orgText, { marginBottom: 16 }]}>
-                • NeuralBio Health (2/4 hackers - Pending Check-In)
-              </Text>
-
-              <Button
-                title="Close Roster"
-                variant="outlineOrganizer"
-                onPress={() => setSelectedForRoster(null)}
-              />
-            </Card>
-          </View>
-        </Modal>
-      )}
-
-      {/* Edit Settings Modal */}
-      {editingHackathon && (
-        <Modal visible={!!editingHackathon} transparent={true} animationType="slide">
-          <View style={styles.modalOverlay}>
-            <Card variant="elevated" style={styles.modalCard}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Edit Event Settings</Text>
-                <TouchableOpacity onPress={() => setEditingHackathon(null)}>
-                  <Icon name="close" size={18} color={colors.textSecondary} />
-                </TouchableOpacity>
-              </View>
-
-              <Input
-                label="Hackathon Name"
-                value={editTitle}
-                onChangeText={setEditTitle}
-              />
-
-              <Input
-                label="Organization / University"
-                value={editOrg}
-                onChangeText={setEditOrg}
-              />
-
-              <View style={styles.rowInputs}>
-                <View style={styles.halfInput}>
-                  <Input
-                    label="Prize Pool"
-                    value={editPrize}
-                    onChangeText={setEditPrize}
-                  />
-                </View>
-                <View style={styles.halfInput}>
-                  <Input
-                    label="Capacity"
-                    keyboardType="numeric"
-                    value={editCapacity}
-                    onChangeText={setEditCapacity}
-                  />
-                </View>
-              </View>
-
-              <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
-                <Button
-                  title="Cancel"
-                  variant="outline"
-                  onPress={() => setEditingHackathon(null)}
-                  style={{ flex: 1 }}
-                />
-                <Button
-                  title="Save Changes"
-                  variant="secondary"
-                  onPress={handleSaveEdit}
-                  style={{ flex: 2 }}
-                />
-              </View>
-            </Card>
-          </View>
-        </Modal>
-      )}
     </View>
   );
 };
@@ -479,7 +318,7 @@ const styles = StyleSheet.create({
   },
   capacityFill: {
     height: 4,
-    backgroundColor: colors.organizer,
+    backgroundColor: colors.secondary,
     borderRadius: 2,
   },
   actionsRow: {

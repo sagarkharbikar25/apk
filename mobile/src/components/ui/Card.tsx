@@ -6,7 +6,7 @@ import {
   ViewStyle,
   StyleProp,
 } from 'react-native';
-import { colors, borderRadius } from '../../theme';
+import { colors, spacing, borderRadius, shadows } from '../../theme';
 
 export type CardVariant = 'default' | 'elevated' | 'outlined';
 
@@ -53,20 +53,20 @@ export const Card: React.FC<CardProps> = ({
 
 const styles = StyleSheet.create({
   base: {
-    backgroundColor: colors.surface, // #16181C
-    borderRadius: borderRadius.md,
-    paddingVertical: 18, // ~20% increased vertical breathing room
-    paddingHorizontal: 16,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
     borderWidth: 1,
-    borderColor: colors.surfaceBorder, // #24262B
+    borderColor: colors.surfaceBorder,
   },
   default: {
     backgroundColor: colors.surface,
     borderColor: colors.surfaceBorder,
   },
   elevated: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceElevated,
     borderColor: colors.surfaceBorder,
+    ...shadows.md,
   },
   outlined: {
     backgroundColor: 'transparent',

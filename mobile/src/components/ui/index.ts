@@ -8,5 +8,3 @@ export * from './LoadingScreen';
 export * from './IconButton';
 export * from './Header';
 export * from './Icon';
-export * from './AppLogo';
-export * from './QRCodeView';

@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   },
   metricValue: {
     ...typography.captionBold,
-    color: colors.studentAccent,
+    color: colors.primaryLight,
     marginTop: 1,
   },
   registerBtn: {

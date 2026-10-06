@@ -10,17 +10,7 @@ import {
 } from 'react-native';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 
-export type ButtonVariant =
-  | 'primary'
-  | 'secondary'
-  | 'student'
-  | 'organizer'
-  | 'outline'
-  | 'outlineOrganizer'
-  | 'link'
-  | 'ghost'
-  | 'danger';
-
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export interface ButtonProps extends TouchableOpacityProps {
@@ -48,15 +38,6 @@ export const Button: React.FC<ButtonProps> = ({
 }) => {
   const isDisabled = disabled || isLoading;
 
-  const getSpinnerColor = () => {
-    if (variant === 'primary' || variant === 'student' || variant === 'organizer') {
-      return colors.textDark;
-    }
-    if (variant === 'outlineOrganizer' || variant === 'secondary') return colors.organizer;
-    if (variant === 'outline' || variant === 'link') return colors.student;
-    return colors.textPrimary;
-  };
-
   return (
     <TouchableOpacity
       activeOpacity={0.8}
@@ -72,7 +53,10 @@ export const Button: React.FC<ButtonProps> = ({
       {...rest}
     >
       {isLoading ? (
-        <ActivityIndicator size="small" color={getSpinnerColor()} />
+        <ActivityIndicator
+          size="small"
+          color={variant === 'outline' || variant === 'ghost' ? colors.primary : colors.textPrimary}
+        />
       ) : (
         <>
           {leftIcon}
@@ -101,107 +85,73 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: borderRadius.sm,
+    borderRadius: borderRadius.md,
   },
-  // ── Sizes ───────────────────────────────────────────────────────
+  // Sizes
   size_sm: {
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.md,
     minHeight: 34,
   },
   size_md: {
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.sm + 2,
     paddingHorizontal: spacing.lg,
-    minHeight: 44,
+    minHeight: 46,
   },
   size_lg: {
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
-    minHeight: 52,
+    minHeight: 54,
   },
-  // ── Variants (Quiet Focus: Flat accents, minimal secondary) ────
+  // Variants
   primary: {
-    backgroundColor: colors.student, // Solid Mint #6EE7C4
-  },
-  student: {
-    backgroundColor: colors.student, // Solid Mint #6EE7C4
+    backgroundColor: colors.primary,
   },
   secondary: {
-    backgroundColor: colors.organizer, // Solid Amber #E8B25E
-  },
-  organizer: {
-    backgroundColor: colors.organizer, // Solid Amber #E8B25E
+    backgroundColor: colors.secondary,
   },
   outline: {
     backgroundColor: 'transparent',
-    borderWidth: 0,
-    paddingHorizontal: 0,
-  },
-  outlineOrganizer: {
-    backgroundColor: 'transparent',
-    borderWidth: 0,
-    paddingHorizontal: 0,
-  },
-  link: {
-    backgroundColor: 'transparent',
-    borderWidth: 0,
-    paddingHorizontal: 0,
+    borderWidth: 1.5,
+    borderColor: colors.primary,
   },
   ghost: {
     backgroundColor: 'transparent',
-    borderWidth: 0,
   },
   danger: {
-    backgroundColor: colors.error, // Soft Coral
+    backgroundColor: colors.error,
   },
   disabled: {
-    opacity: 0.4,
+    opacity: 0.5,
   },
-  // ── Typography ──────────────────────────────────────────────────
+  // Text
   textBase: {
     ...typography.button,
     textAlign: 'center',
-    fontWeight: '600',
-    letterSpacing: 0.3,
   },
   textSize_sm: {
     fontSize: 13,
   },
   textSize_md: {
-    fontSize: 14,
+    fontSize: 15,
   },
   textSize_lg: {
-    fontSize: 16,
+    fontSize: 17,
   },
   text_primary: {
-    color: colors.textDark, // #0E0F12
-  },
-  text_student: {
-    color: colors.textDark,
+    color: colors.textPrimary,
   },
   text_secondary: {
-    color: colors.textDark, // #0E0F12
-  },
-  text_organizer: {
-    color: colors.textDark,
+    color: colors.textPrimary,
   },
   text_outline: {
-    color: colors.student,
-    fontWeight: '500',
-  },
-  text_outlineOrganizer: {
-    color: colors.organizer,
-    fontWeight: '500',
-  },
-  text_link: {
-    color: colors.student,
-    fontWeight: '500',
+    color: colors.primaryLight,
   },
   text_ghost: {
     color: colors.textSecondary,
   },
   text_danger: {
-    color: colors.textDark,
+    color: colors.textPrimary,
   },
   textDisabled: {
     color: colors.textMuted,

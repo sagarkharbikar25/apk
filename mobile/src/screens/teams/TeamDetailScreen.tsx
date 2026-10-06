@@ -99,17 +99,6 @@ export const TeamDetailScreen: React.FC<Props> = ({ route, navigation }) => {
             onPress={() => setShowQRModal(true)}
             style={styles.shareBtn}
           />
-
-          {!isFull && (
-            <Button
-              title="Find & Invite Teammates"
-              variant="outline"
-              onPress={() => {
-                navigation.getParent()?.navigate('DiscoverTab');
-              }}
-              style={{ marginTop: spacing.sm }}
-            />
-          )}
         </Card>
 
         {/* Member List Section */}
@@ -181,7 +170,7 @@ const styles = StyleSheet.create({
   },
   hackathonBadge: {
     ...typography.captionBold,
-    color: colors.textMuted,
+    color: colors.secondaryLight,
     marginBottom: spacing.sm,
   },
   descText: {
@@ -207,7 +196,7 @@ const styles = StyleSheet.create({
   },
   meterValue: {
     ...typography.captionBold,
-    color: colors.studentAccent,
+    color: colors.primaryLight,
   },
   meterBg: {
     height: 6,
@@ -217,7 +206,7 @@ const styles = StyleSheet.create({
   },
   meterFill: {
     height: '100%',
-    backgroundColor: colors.studentAccent,
+    backgroundColor: colors.primary,
     borderRadius: borderRadius.full,
   },
   shareBtn: {
