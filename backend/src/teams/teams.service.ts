@@ -338,4 +338,79 @@ export class TeamsService {
       },
     });
   }
+
+  // ── POST /teams/:id/qr ──────────────────────────────────────
+  async generateQr(teamId: string, userId: string) {
+    const team = await this.prisma.team.findFirst({
+      where: { id: teamId, deletedAt: null },
+      include: { members: true },
+    });
+    if (!team) throw new NotFoundException('Team not found');
+    const isLeader =
+      team.creatorId === userId ||
+      team.members.some((m) => m.userId === userId && m.isAdmin);
+    if (!isLeader) {
+      throw new ForbiddenException('Only team leaders can generate or rotate QR tokens');
+    }
+
+    const token = uuidv4();
+    await this.redis.setEx(`qr_join:${token}`, QR_TOKEN_TTL, team.id);
+    await this.prisma.team.update({
+      where: { id: teamId },
+      data: { qrCode: token },
+    });
+
+    return {
+      token,
+      deepLink: `skillsync://join/team/${teamId}?t=${token}`,
+      expiresAt: new Date(Date.now() + QR_TOKEN_TTL * 1000).toISOString(),
+    };
+  }
+
+  // ── DELETE /teams/:id/members/:userId ───────────────────────
+  async removeMember(teamId: string, currentUserId: string, targetUserId: string) {
+    const team = await this.prisma.team.findFirst({
+      where: { id: teamId, deletedAt: null },
+      include: { members: true },
+    });
+    if (!team) throw new NotFoundException('Team not found');
+    const isLeader =
+      team.creatorId === currentUserId ||
+      team.members.some((m) => m.userId === currentUserId && m.isAdmin);
+    const isSelf = currentUserId === targetUserId;
+
+    if (!isLeader && !isSelf) {
+      throw new ForbiddenException('You cannot remove members from this team');
+    }
+
+    if (isSelf && isLeader && team.members.length > 1) {
+      throw new BadRequestException(
+        'Leader cannot leave while members remain. Transfer leadership or delete team.',
+      );
+    }
+
+    await this.prisma.teamMember.deleteMany({
+      where: { teamId, userId: targetUserId },
+    });
+
+    return { success: true, message: 'Member removed successfully' };
+  }
+
+  // ── DELETE /teams/:id ───────────────────────────────────────
+  async deleteTeam(teamId: string, userId: string) {
+    const team = await this.prisma.team.findFirst({
+      where: { id: teamId, deletedAt: null },
+    });
+    if (!team) throw new NotFoundException('Team not found');
+    if (team.creatorId !== userId) {
+      throw new ForbiddenException('Only the team creator can delete the team');
+    }
+
+    await this.prisma.team.update({
+      where: { id: teamId },
+      data: { deletedAt: new Date() },
+    });
+
+    return { success: true, message: 'Team deleted' };
+  }
 }

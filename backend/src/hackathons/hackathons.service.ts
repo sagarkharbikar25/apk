@@ -3,13 +3,25 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { HackathonQueryDto, RegisterHackathonDto } from './dto/hackathon.dto.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
+import {
+  HackathonQueryDto,
+  RegisterHackathonDto,
+  CreateHackathonDto,
+  UpdateHackathonDto,
+  ParticipantQueryDto,
+  AnnounceDto,
+} from './dto/hackathon.dto.js';
 
 @Injectable()
 export class HackathonsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService,
+  ) {}
 
   // ── GET /hackathons ─────────────────────────────────────────
   async findAll(query: HackathonQueryDto) {
@@ -131,5 +143,144 @@ export class HackathonsService {
         hackathon: { select: { id: true, title: true } },
       },
     });
+  }
+
+  // ── POST /hackathons (organizer) ───────────────────────────
+  async create(organizerId: string, dto: CreateHackathonDto) {
+    return this.prisma.hackathon.create({
+      data: {
+        organizerId,
+        title: dto.title,
+        description: dto.description,
+        startDate: new Date(dto.startDate),
+        endDate: new Date(dto.endDate),
+        registrationDeadline: new Date(dto.registrationDeadline),
+        maxTeamSize: dto.maxTeamSize || 4,
+      },
+    });
+  }
+
+  // ── PATCH /hackathons/:id (owner) ──────────────────────────
+  async update(organizerId: string, id: string, dto: UpdateHackathonDto) {
+    const hackathon = await this.prisma.hackathon.findUnique({
+      where: { id },
+      include: { participants: { include: { team: { include: { members: true } } } } },
+    });
+
+    if (!hackathon) throw new NotFoundException(`Hackathon with ID ${id} not found`);
+    if (hackathon.organizerId !== organizerId) {
+      throw new ForbiddenException('Only the hackathon organizer can modify this event');
+    }
+
+    if (dto.maxTeamSize !== undefined) {
+      const maxExistingTeamSize = Math.max(
+        0,
+        ...hackathon.participants.map((p) => p.team?.members.length || 0),
+      );
+      if (dto.maxTeamSize < maxExistingTeamSize) {
+        throw new BadRequestException(
+          `Cannot lower max team size below existing team size (${maxExistingTeamSize})`,
+        );
+      }
+    }
+
+    return this.prisma.hackathon.update({
+      where: { id },
+      data: {
+        ...(dto.title && { title: dto.title }),
+        ...(dto.description !== undefined && { description: dto.description }),
+        ...(dto.startDate && { startDate: new Date(dto.startDate) }),
+        ...(dto.endDate && { endDate: new Date(dto.endDate) }),
+        ...(dto.registrationDeadline && { registrationDeadline: new Date(dto.registrationDeadline) }),
+        ...(dto.maxTeamSize && { maxTeamSize: dto.maxTeamSize }),
+        ...(dto.isActive !== undefined && { isActive: dto.isActive }),
+      },
+    });
+  }
+
+  // ── GET /organizer/hackathons ──────────────────────────────
+  async getOrganizerHackathons(organizerId: string) {
+    return this.prisma.hackathon.findMany({
+      where: { organizerId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        _count: { select: { participants: true } },
+      },
+    });
+  }
+
+  // ── GET /hackathons/:id/participants ───────────────────────
+  async getParticipants(organizerId: string, hackathonId: string, query: ParticipantQueryDto) {
+    const hackathon = await this.prisma.hackathon.findUnique({ where: { id: hackathonId } });
+    if (!hackathon) throw new NotFoundException('Hackathon not found');
+    if (hackathon.organizerId !== organizerId) {
+      throw new ForbiddenException('Only the hackathon organizer can view participants');
+    }
+
+    const where: any = {
+      hackathonId,
+      ...(query.teamless && { teamId: null }),
+    };
+
+    return this.prisma.hackathonParticipant.findMany({
+      where,
+      include: {
+        user: { select: { id: true, email: true, profile: true } },
+        team: { select: { id: true, name: true } },
+      },
+      orderBy: { id: 'asc' },
+    });
+  }
+
+  // ── GET /hackathons/:id/teams ──────────────────────────────
+  async getTeams(organizerId: string, hackathonId: string) {
+    const hackathon = await this.prisma.hackathon.findUnique({ where: { id: hackathonId } });
+    if (!hackathon) throw new NotFoundException('Hackathon not found');
+    if (hackathon.organizerId !== organizerId) {
+      throw new ForbiddenException('Only the hackathon organizer can view teams');
+    }
+
+    return this.prisma.team.findMany({
+      where: { hackathonParticipants: { some: { hackathonId } }, deletedAt: null },
+      include: {
+        members: {
+          include: {
+            user: { select: { id: true, email: true, profile: true } },
+          },
+        },
+      },
+    });
+  }
+
+  // ── PATCH /hackathons/:id/participants/:userId/check-in ────
+  async checkIn(organizerId: string, hackathonId: string, userId: string, checkedIn: boolean) {
+    const hackathon = await this.prisma.hackathon.findUnique({ where: { id: hackathonId } });
+    if (!hackathon) throw new NotFoundException('Hackathon not found');
+    if (hackathon.organizerId !== organizerId) {
+      throw new ForbiddenException('Only the hackathon organizer can check in participants');
+    }
+
+    const participant = await this.prisma.hackathonParticipant.findUnique({
+      where: { hackathonId_userId: { hackathonId, userId } },
+    });
+    if (!participant) throw new NotFoundException('Participant not found');
+
+    return {
+      success: true,
+      hackathonId,
+      userId,
+      checkedIn,
+    };
+  }
+
+  // ── POST /hackathons/:id/announce ──────────────────────────
+  async announce(organizerId: string, hackathonId: string, dto: AnnounceDto) {
+    const hackathon = await this.prisma.hackathon.findUnique({ where: { id: hackathonId } });
+    if (!hackathon) throw new NotFoundException('Hackathon not found');
+    if (hackathon.organizerId !== organizerId) {
+      throw new ForbiddenException('Only the hackathon organizer can broadcast announcements');
+    }
+
+    return this.notificationsService.broadcastAnnouncement(hackathonId, dto.title, dto.body);
   }
 }

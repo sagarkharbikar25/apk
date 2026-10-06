@@ -4,6 +4,7 @@ import {
   UnauthorizedException,
   BadRequestException,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -14,6 +15,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { RedisService } from '../redis/redis.service.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { LoginDto } from './dto/login.dto.js';
+import { Role } from '@prisma/client';
 
 const BCRYPT_SALT_ROUNDS = 12;
 const OTP_TTL_SECONDS = 600; // 10 minutes
@@ -38,6 +40,13 @@ export class AuthService {
 
   // ── Register ─────────────────────────────────────────────────
   async register(dto: RegisterDto) {
+    if (dto.role === 'organizer') {
+      const validCode = this.configService.get<string>('ORGANIZER_INVITE_CODE') || 'SKILLSYNC_ORG_2026';
+      if (dto.organizerCode !== validCode) {
+        throw new ForbiddenException('Invalid organizer invite code');
+      }
+    }
+
     const existing = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
@@ -47,11 +56,13 @@ export class AuthService {
     }
 
     const passwordHash = await bcrypt.hash(dto.password, BCRYPT_SALT_ROUNDS);
+    const assignedRole = (dto.role === 'organizer' ? Role.organizer : Role.student);
 
     const user = await this.prisma.user.create({
       data: {
         email: dto.email,
         passwordHash,
+        role: assignedRole,
         profile: {
           create: {
             displayName: dto.displayName,
@@ -65,13 +76,13 @@ export class AuthService {
     const otp = generateOtp();
     await this.redis.setEx(`otp:${dto.email}`, OTP_TTL_SECONDS, otp);
 
-    // In production: send otp via email service
-    // For now: log it (remove in prod)
+    const isDev = this.configService.get<string>('NODE_ENV') !== 'production';
     console.log(`[DEV] OTP for ${dto.email}: ${otp}`);
 
     return {
       message: 'Registration successful. Check your email for the OTP.',
       userId: user.id,
+      otp: isDev ? otp : undefined,
     };
   }
 
@@ -112,7 +123,16 @@ export class AuthService {
       include: { user: { select: { id: true, role: true, isActive: true, deletedAt: true } } },
     });
 
-    if (!stored || stored.revoked || new Date() > stored.expiresAt) {
+    // Reuse detection: if token exists but was already revoked, revoke ALL user tokens
+    if (stored && stored.revoked) {
+      await this.prisma.refreshToken.updateMany({
+        where: { userId: stored.userId },
+        data: { revoked: true },
+      });
+      throw new UnauthorizedException('Refresh token reuse detected. All sessions revoked.');
+    }
+
+    if (!stored || new Date() > stored.expiresAt) {
       throw new UnauthorizedException('Refresh token invalid or expired');
     }
 
@@ -132,10 +152,17 @@ export class AuthService {
   // ── Logout ────────────────────────────────────────────────────
   async logout(refreshToken: string) {
     const tokenHash = hashToken(refreshToken);
-    await this.prisma.refreshToken.updateMany({
-      where: { tokenHash, revoked: false },
-      data: { revoked: true },
-    });
+    const stored = await this.prisma.refreshToken.findUnique({ where: { tokenHash } });
+    if (stored) {
+      await this.prisma.user.update({
+        where: { id: stored.userId },
+        data: { fcmToken: null },
+      });
+      await this.prisma.refreshToken.updateMany({
+        where: { tokenHash, revoked: false },
+        data: { revoked: true },
+      });
+    }
     return { message: 'Logged out successfully' };
   }
 

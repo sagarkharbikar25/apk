@@ -112,4 +112,42 @@ export class NotificationsService {
 
     return { message: 'All notifications marked as read' };
   }
+
+  /**
+   * Broadcast announcement: DB row first, push second
+   */
+  async broadcastAnnouncement(hackathonId: string, title: string, body: string) {
+    const participants = await this.prisma.hackathonParticipant.findMany({
+      where: { hackathonId },
+      include: { user: { select: { id: true, fcmToken: true } } },
+    });
+
+    if (!participants.length) return { sentCount: 0 };
+
+    // 1. DB rows first (source of truth)
+    await this.prisma.notification.createMany({
+      data: participants.map((p) => ({
+        userId: p.userId,
+        type: 'hackathon_announcement',
+        title,
+        body,
+        data: { hackathonId, route: `skillsync://hackathons/${hackathonId}` },
+      })),
+    });
+
+    // 2. FCM push second (sendEachForMulticast)
+    const tokens = participants
+      .map((p) => p.user?.fcmToken)
+      .filter((t): t is string => Boolean(t));
+
+    if (tokens.length) {
+      await this.firebase.sendMulticast(tokens, {
+        title,
+        body,
+        data: { hackathonId, type: 'hackathon_announcement' },
+      });
+    }
+
+    return { sentCount: participants.length };
+  }
 }

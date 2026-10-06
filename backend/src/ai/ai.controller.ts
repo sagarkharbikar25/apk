@@ -12,6 +12,8 @@ import {
   AnalyzeProjectDto,
   SkillGapDto,
   RecommendationQueryDto,
+  ExtractSkillsDto,
+  TeamRequirementsDto,
 } from './dto/ai.dto.js';
 import { CurrentUser } from '../common/decorators/current-user.decorator.js';
 
@@ -20,6 +22,24 @@ import { CurrentUser } from '../common/decorators/current-user.decorator.js';
 @Controller('ai')
 export class AiController {
   constructor(private readonly aiService: AiService) {}
+
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @Post('extract-skills')
+  @ApiOperation({
+    summary: 'Extract skills from text (up to 2000 chars, 10/min rate limit)',
+  })
+  extractSkills(@Body() dto: ExtractSkillsDto) {
+    return this.aiService.extractSkills(dto);
+  }
+
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @Post('team-requirements')
+  @ApiOperation({
+    summary: 'Extract required skills from team description (10/min rate limit)',
+  })
+  extractTeamRequirements(@Body() dto: TeamRequirementsDto) {
+    return this.aiService.extractTeamRequirements(dto);
+  }
 
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post('analyze-project')

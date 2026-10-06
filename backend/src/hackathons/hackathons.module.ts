@@ -1,9 +1,14 @@
 import { Module } from '@nestjs/common';
-import { HackathonsController } from './hackathons.controller.js';
+import {
+  HackathonsController,
+  OrganizerHackathonsController,
+} from './hackathons.controller.js';
 import { HackathonsService } from './hackathons.service.js';
+import { NotificationsModule } from '../notifications/notifications.module.js';
 
 @Module({
-  controllers: [HackathonsController],
+  imports: [NotificationsModule],
+  controllers: [HackathonsController, OrganizerHackathonsController],
   providers: [HackathonsService],
   exports: [HackathonsService],
 })

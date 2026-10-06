@@ -73,4 +73,32 @@ export class FirebaseService {
       return false;
     }
   }
+
+  /**
+   * Send FCM multicast push notifications to multiple device tokens
+   */
+  async sendMulticast(tokens: string[], payload: PushNotificationPayload): Promise<void> {
+    const validTokens = tokens.filter(Boolean);
+    if (!validTokens.length) return;
+
+    if (!this.firebaseApp) {
+      this.logger.log(
+        `[SIMULATED MULTICAST PUSH] To ${validTokens.length} devices | Title: "${payload.title}"`,
+      );
+      return;
+    }
+
+    try {
+      await getMessaging(this.firebaseApp).sendEachForMulticast({
+        tokens: validTokens,
+        notification: {
+          title: payload.title,
+          body: payload.body,
+        },
+        data: payload.data,
+      });
+    } catch (err: any) {
+      this.logger.error(`Error sending FCM multicast: ${err.message}`);
+    }
+  }
 }

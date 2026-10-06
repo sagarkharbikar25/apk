@@ -82,4 +82,8 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   async setJsonEx<T>(key: string, ttlSeconds: number, value: T): Promise<void> {
     await this.client.setex(key, ttlSeconds, JSON.stringify(value));
   }
+
+  async ping(): Promise<string> {
+    return this.client.ping();
+  }
 }

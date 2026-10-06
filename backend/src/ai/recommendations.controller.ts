@@ -20,4 +20,15 @@ export class RecommendationsController {
   ) {
     return this.aiService.getRecommendations(userId, query.projectId);
   }
+
+  @Get('teams')
+  @ApiOperation({
+    summary: 'Get recommended teams for current user',
+  })
+  getTeamRecommendations(
+    @CurrentUser('id') userId: string,
+    @Query('hackathonId') hackathonId?: string,
+  ) {
+    return this.aiService.getTeamRecommendationsForUser(userId, hackathonId);
+  }
 }

@@ -2,12 +2,18 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
   Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RedisService } from '../redis/redis.service.js';
 import { GeminiService } from './gemini.service.js';
-import { AnalyzeProjectDto, SkillGapDto } from './dto/ai.dto.js';
+import {
+  AnalyzeProjectDto,
+  SkillGapDto,
+  ExtractSkillsDto,
+  TeamRequirementsDto,
+} from './dto/ai.dto.js';
 import { SkillLevel, LookingFor } from '@prisma/client';
 
 const RECOMMENDATIONS_CACHE_TTL = 1800; // 30 minutes
@@ -29,7 +35,25 @@ export class AiService {
     private gemini: GeminiService,
   ) {}
 
-  // ── POST /ai/analyze-project ─────────────────────────────────
+  // ── POST /ai/extract-skills ──────────────────────────────────
+  async extractSkills(dto: ExtractSkillsDto) {
+    if (!dto.text?.trim()) {
+      throw new BadRequestException('Text is required');
+    }
+    const skills = await this.gemini.extractSkills(dto.text);
+    return { skills };
+  }
+
+  // ── POST /ai/team-requirements ───────────────────────────────
+  async extractTeamRequirements(dto: TeamRequirementsDto) {
+    if (!dto.description?.trim()) {
+      throw new BadRequestException('Description is required');
+    }
+    const requiredSkills = await this.gemini.extractTeamRequirements(dto.description);
+    return { requiredSkills };
+  }
+
+  // ── POST /ai/analyze-project (Legacy / Alias) ────────────────
   async analyzeProject(dto: AnalyzeProjectDto) {
     if (!dto.title?.trim() || !dto.description?.trim()) {
       throw new BadRequestException('Project title and description are required');
@@ -379,5 +403,70 @@ export class AiService {
     await this.redis.setJsonEx(cacheKey, RECOMMENDATIONS_CACHE_TTL, scoredProjects);
 
     return scoredProjects;
+  }
+
+  // ── GET /recommendations/teams ──────────────────────────────
+  async getTeamRecommendationsForUser(userId: string, hackathonId?: string) {
+    const cacheKey = `recs:teams:${userId}:${hackathonId || 'all'}`;
+    const cached = await this.redis.getJson<any>(cacheKey);
+    if (cached) return cached;
+
+    const userSkills = await this.prisma.userSkill.findMany({
+      where: { userId },
+      include: { skill: true },
+    });
+    const userSkillNames = new Set(userSkills.map((s) => s.skill.name.toLowerCase()));
+
+    const teams = await this.prisma.team.findMany({
+      where: {
+        deletedAt: null,
+        members: { none: { userId } },
+        ...(hackathonId && { hackathonParticipants: { some: { hackathonId } } }),
+      },
+      include: {
+        creator: { select: { id: true, profile: true } },
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                profile: true,
+                userSkills: { include: { skill: true } },
+              },
+            },
+          },
+        },
+      },
+      take: 20,
+    });
+
+    const scored = teams.map((team) => {
+      const existingTeamSkills = new Set(
+        team.members.flatMap((m) => m.user.userSkills.map((us) => us.skill.name.toLowerCase())),
+      );
+      let complementaryCount = 0;
+      userSkillNames.forEach((s) => {
+        if (!existingTeamSkills.has(s)) complementaryCount++;
+      });
+
+      const score = Number(Math.min(0.98, 0.5 + complementaryCount * 0.1).toFixed(2));
+      return {
+        id: team.id,
+        name: team.name,
+        description: team.description,
+        creatorName: team.creator?.profile?.displayName || 'Team Leader',
+        membersCount: team.members.length,
+        maxMembers: team.maxMembers,
+        score,
+        reasons: [
+          complementaryCount > 0
+            ? `Brings ${complementaryCount} new skills to the squad`
+            : 'Open team seeking active hackathon collaborators',
+        ],
+      };
+    });
+
+    await this.redis.setJsonEx(cacheKey, RECOMMENDATIONS_CACHE_TTL, scored);
+    return scored;
   }
 }

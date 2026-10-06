@@ -17,12 +17,26 @@ export class CreateTeamDto {
   @IsNotEmpty()
   name: string;
 
+  @ApiPropertyOptional({ example: 'uuid-hackathon-id' })
+  @IsOptional()
+  @IsString()
+  hackathonId?: string;
+
   @ApiPropertyOptional({ example: 'uuid-project-id' })
   @IsOptional()
   @IsString()
   projectId?: string;
 
-  @ApiPropertyOptional({ example: 5, default: 5 })
+  @ApiPropertyOptional({ example: 'Building hackathon AI tool' })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiPropertyOptional({ example: ['uuid-skill-1'] })
+  @IsOptional()
+  requiredSkillIds?: string[];
+
+  @ApiPropertyOptional({ example: 4, default: 4 })
   @IsOptional()
   @IsInt()
   @Min(2)

@@ -18,4 +18,12 @@ export class RegisterDto {
   @IsString()
   @MinLength(2)
   displayName: string;
+
+  @ApiProperty({ example: 'student', enum: ['student', 'organizer'], required: false })
+  @IsString()
+  role?: 'student' | 'organizer';
+
+  @ApiProperty({ example: 'SKILLSYNC_ORG_2026', required: false })
+  @IsString()
+  organizerCode?: string;
 }

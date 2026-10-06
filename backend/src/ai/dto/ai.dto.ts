@@ -40,3 +40,24 @@ export class RecommendationQueryDto {
   @IsString()
   projectId?: string;
 }
+
+export class ExtractSkillsDto {
+  @ApiProperty({ example: 'I am proficient in React Native, TypeScript, Node.js, and Postgres.' })
+  @IsString()
+  @IsNotEmpty()
+  text: string;
+}
+
+export class TeamRequirementsDto {
+  @ApiProperty({ example: 'Looking for a frontend dev with React Native and an AI dev with Python.' })
+  @IsString()
+  @IsNotEmpty()
+  description: string;
+}
+
+export class TeamRecommendationsQueryDto {
+  @ApiPropertyOptional({ example: 'uuid-hackathon-id' })
+  @IsOptional()
+  @IsString()
+  hackathonId?: string;
+}

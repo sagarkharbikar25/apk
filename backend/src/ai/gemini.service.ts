@@ -107,6 +107,32 @@ Output only valid JSON. Do not include extra text.
   }
 
   /**
+   * Extract skills from freeform user bio or text (up to 2000 chars)
+   */
+  async extractSkills(text: string): Promise<string[]> {
+    const fallback = ['TypeScript', 'React Native', 'Node.js'];
+    const prompt = `You are a technical recruiter. Extract a clean list of programming languages, libraries, and frameworks explicitly mentioned in this text:
+"${text.slice(0, 2000)}"
+Return a strict JSON array of strings, e.g. ["TypeScript", "Python", "Docker"]. Output only valid JSON.`;
+
+    const res = await this.generateJson<string[]>(prompt, fallback);
+    return Array.isArray(res) ? res : fallback;
+  }
+
+  /**
+   * Extract team requirement skills from team description
+   */
+  async extractTeamRequirements(description: string): Promise<string[]> {
+    const fallback = ['Frontend', 'Backend'];
+    const prompt = `Analyze this hackathon team description and extract the required tech skills and roles:
+"${description.slice(0, 2000)}"
+Return a strict JSON array of strings, e.g. ["React Native", "Python", "FastAPI"]. Output only valid JSON.`;
+
+    const res = await this.generateJson<string[]>(prompt, fallback);
+    return Array.isArray(res) ? res : fallback;
+  }
+
+  /**
    * Generates tailored learning recommendations for missing skills
    */
   async getSkillGapSuggestions(

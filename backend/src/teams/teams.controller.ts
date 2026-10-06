@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Body,
   Param,
   Query,
@@ -79,5 +80,33 @@ export class TeamsController {
     @Body() dto: RespondInvitationDto,
   ) {
     return this.teamsService.respondInvitation(invitationId, userId, dto);
+  }
+
+  @Post(':id/qr')
+  @ApiOperation({ summary: 'Generate or rotate QR join token (Leader only)' })
+  generateQr(
+    @CurrentUser('id') userId: string,
+    @Param('id') teamId: string,
+  ) {
+    return this.teamsService.generateQr(teamId, userId);
+  }
+
+  @Delete(':id/members/:userId')
+  @ApiOperation({ summary: 'Remove a member or leave team' })
+  removeMember(
+    @CurrentUser('id') currentUserId: string,
+    @Param('id') teamId: string,
+    @Param('userId') targetUserId: string,
+  ) {
+    return this.teamsService.removeMember(teamId, currentUserId, targetUserId);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Soft delete team (Leader only)' })
+  deleteTeam(
+    @CurrentUser('id') userId: string,
+    @Param('id') teamId: string,
+  ) {
+    return this.teamsService.deleteTeam(teamId, userId);
   }
 }
