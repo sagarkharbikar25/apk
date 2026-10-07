@@ -40,9 +40,15 @@ export const setupApiClientAuth = (
   onAuthFailedCallback = onFail;
 };
 
+let isFirstRequest = true;
+
 // Request Interceptor: Attach JWT Bearer Token & ensure /api/v1 prefix
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    if (isFirstRequest) {
+      config.timeout = 45000;
+      isFirstRequest = false;
+    }
     const { accessToken } = tokenProvider();
     if (accessToken && !config.headers.Authorization) {
       config.headers.Authorization = `Bearer ${accessToken}`;

@@ -1,251 +1,84 @@
-import React, { useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Animated,
-  ActivityIndicator,
-  Image,
-} from 'react-native';
-import { colors, typography, spacing, borderRadius } from '../../theme';
-
-declare const process: any;
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, Animated } from 'react-native';
+import { Brand, Headline, Screen, SectionLabel } from '../../components/ui';
+import { useAuthStore } from '../../store/authStore';
 
 interface SplashScreenProps {
   onFinish?: () => void;
 }
 
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
+  const [showWaking, setShowWaking] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.85)).current;
-  const textFadeAnim = useRef(new Animated.Value(0)).current;
+  const initAuth = useAuthStore(s => s.initAuth);
 
   useEffect(() => {
-    if (process.env.NODE_ENV === 'test') {
-      onFinish?.();
-      return;
-    }
-
     let isMounted = true;
-    let timer: ReturnType<typeof setTimeout> | undefined;
+    
+    // Boot sequence
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1200,
+      useNativeDriver: true,
+    }).start();
 
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 900,
-        useNativeDriver: true,
-      }),
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        friction: 6,
-        tension: 40,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      if (!isMounted) return;
-      Animated.timing(textFadeAnim, {
-        toValue: 1,
-        duration: 600,
-        useNativeDriver: true,
-      }).start(() => {
-        if (!isMounted) return;
-        timer = setTimeout(() => {
-          if (isMounted) {
-            onFinish?.();
-          }
-        }, 1200);
-      });
+    const wakingTimer = setTimeout(() => {
+      if (isMounted) setShowWaking(true);
+    }, 3000);
+
+    // Initialize auth store (loads keychain)
+    initAuth().then(() => {
+      // Simulate minimum splash time for effect
+      setTimeout(() => {
+        if (isMounted && onFinish) {
+          onFinish();
+        }
+      }, 4000);
     });
 
     return () => {
       isMounted = false;
-      if (timer) {
-        clearTimeout(timer);
-      }
+      clearTimeout(wakingTimer);
     };
-  }, [fadeAnim, scaleAnim, textFadeAnim, onFinish]);
+  }, [fadeAnim, initAuth, onFinish]);
 
   return (
-    <View style={styles.container}>
-      {/* Background ambient glow circles */}
-      <View style={styles.glowTopRight} />
-      <View style={styles.glowBottomLeft} />
+    <Screen withRain="animated" style={styles.container}>
+      <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
+        <Brand size="large" style={styles.brand} />
+        
+        <Headline accent="SYNC." style={styles.tagline}>
+          FIND.
+        </Headline>
+        <Headline>SHIP.</Headline>
 
-      <Animated.View
-        style={[
-          styles.content,
-          {
-            opacity: fadeAnim,
-            transform: [{ scale: scaleAnim }],
-          },
-        ]}
-      >
-        {/* Futuristic Brand Emblem */}
-        <View style={styles.emblemOuter}>
-          <Image
-            source={require('../../assets/logo.png')}
-            style={styles.logoImage}
-            resizeMode="cover"
-          />
-        </View>
-
-        {/* Brand Title */}
-        <Text style={styles.brandTitle}>SkillSync</Text>
-        <Text style={styles.brandAccent}>AI HACKATHON COLLABORATION</Text>
-
-        <Animated.View style={[styles.taglineWrap, { opacity: textFadeAnim }]}>
-          <Text style={styles.tagline}>
-            Match with dream teammates & projects using explainable AI.
-          </Text>
-
-          <View style={styles.statusPill}>
-            <View style={styles.liveIndicator} />
-            <Text style={styles.statusText}>Gemini AI • Redis Real-Time</Text>
+        {showWaking && (
+          <View style={styles.footer}>
+            <SectionLabel label="WAKING SERVER..." />
           </View>
-
-          <ActivityIndicator
-            size="small"
-            color={colors.primaryLight}
-            style={styles.spinner}
-          />
-        </Animated.View>
+        )}
       </Animated.View>
-
-      <Text style={styles.footerVersion}>SkillSync v1.0 • Enterprise Edition</Text>
-    </View>
+    </Screen>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.xl,
-  },
-  glowTopRight: {
-    position: 'absolute',
-    top: -80,
-    right: -80,
-    width: 240,
-    height: 240,
-    borderRadius: 120,
-    backgroundColor: colors.primarySubtle,
-  },
-  glowBottomLeft: {
-    position: 'absolute',
-    bottom: -100,
-    left: -100,
-    width: 280,
-    height: 280,
-    borderRadius: 140,
-    backgroundColor: colors.secondarySubtle,
   },
   content: {
-    alignItems: 'center',
-    width: '100%',
-  },
-  emblemOuter: {
-    width: 120,
-    height: 120,
-    borderRadius: 30,
-    overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: colors.surfaceBorderHighlight,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-    backgroundColor: colors.surfaceElevated,
-    shadowColor: colors.secondaryLight,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.45,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  logoImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 28,
-  },
-  emblemMiddle: {
-    width: 86,
-    height: 86,
-    borderRadius: 43,
-    backgroundColor: colors.surfaceElevated,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.secondary,
-  },
-  emblemCore: {
-    width: 62,
-    height: 62,
-    borderRadius: 31,
-    backgroundColor: colors.primaryDark,
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  emblemIcon: {
-    fontSize: 30,
-  },
-  brandTitle: {
-    ...typography.h1,
-    fontSize: 36,
-    lineHeight: 42,
-    color: colors.textPrimary,
-    letterSpacing: -1,
-    fontWeight: '800',
-  },
-  brandAccent: {
-    ...typography.captionBold,
-    color: colors.secondaryLight,
-    letterSpacing: 2,
-    marginTop: spacing.xxs,
-    marginBottom: spacing.lg,
-  },
-  taglineWrap: {
-    alignItems: 'center',
+  brand: {
+    marginBottom: 48,
   },
   tagline: {
-    ...typography.body,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 22,
-    maxWidth: 280,
-    marginBottom: spacing.xl,
+    marginBottom: -8,
   },
-  statusPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surfaceElevated,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.full,
-    borderWidth: 1,
-    borderColor: colors.surfaceBorder,
-    marginBottom: spacing.xl,
-    gap: spacing.xs,
-  },
-  liveIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.success,
-  },
-  statusText: {
-    ...typography.captionBold,
-    color: colors.textSecondary,
-    fontSize: 11,
-  },
-  spinner: {
-    marginTop: spacing.xs,
-  },
-  footerVersion: {
+  footer: {
     position: 'absolute',
-    bottom: spacing.xxl,
-    ...typography.caption,
-    color: colors.textMuted,
-    fontSize: 11,
-  },
+    bottom: 48,
+  }
 });

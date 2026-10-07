@@ -4,7 +4,7 @@ import { LoadingScreen } from '../src/components/ui/LoadingScreen';
 import { IconButton } from '../src/components/ui/IconButton';
 import { Header } from '../src/components/ui/Header';
 import { SplashScreen } from '../src/screens/splash/SplashScreen';
-import { Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Text, TouchableOpacity } from 'react-native';
 
 describe('Splash & Reusable Components Unit Tests', () => {
   describe('LoadingScreen', () => {

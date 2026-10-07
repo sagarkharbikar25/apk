@@ -1,12 +1,12 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { LayoutDashboard, PlusSquare, Bell, User } from 'lucide-react-native';
 import { OrganizerTabParamList } from './types';
 import { OrganizerHackathonsScreen } from '../screens/organizer/OrganizerHackathonsScreen';
 import { OrganizerSquadsScreen } from '../screens/organizer/OrganizerSquadsScreen';
 import { OrganizerBroadcastScreen } from '../screens/organizer/OrganizerBroadcastScreen';
 import { OrganizerProfileScreen } from '../screens/organizer/OrganizerProfileScreen';
 import { colors, typography } from '../theme';
-import { Icon } from '../components/ui';
 
 const Tab = createBottomTabNavigator<OrganizerTabParamList>();
 
@@ -18,18 +18,20 @@ export const OrganizerTabNavigator: React.FC = () => {
         headerShown: false,
         tabBarStyle: {
           backgroundColor: colors.surface,
-          borderTopColor: colors.surfaceBorder,
+          borderTopColor: colors.line,
           borderTopWidth: 1,
-          height: 64,
+          height: 60,
           paddingBottom: 8,
           paddingTop: 8,
         },
-        tabBarActiveTintColor: colors.primaryLight,
-        tabBarInactiveTintColor: colors.textMuted,
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.textDim,
         tabBarLabelStyle: {
-          ...typography.captionBold,
-          fontSize: 11,
-          marginTop: 2,
+          ...typography.label,
+          marginTop: 4,
+        },
+        tabBarIconStyle: {
+          marginTop: 4,
         },
       }}
     >
@@ -37,32 +39,32 @@ export const OrganizerTabNavigator: React.FC = () => {
         name="ManageTab"
         component={OrganizerHackathonsScreen}
         options={{
-          tabBarLabel: 'Manage',
-          tabBarIcon: ({ color, size }) => <Icon name="hackathons" color={color} size={size || 22} />,
+          tabBarLabel: 'HUB',
+          tabBarIcon: ({ color }) => <LayoutDashboard color={color} size={20} strokeWidth={1.5} />,
         }}
       />
       <Tab.Screen
         name="SquadsTab"
         component={OrganizerSquadsScreen}
         options={{
-          tabBarLabel: 'Squads',
-          tabBarIcon: ({ color, size }) => <Icon name="teams" color={color} size={size || 22} />,
+          tabBarLabel: 'CREATE',
+          tabBarIcon: ({ color }) => <PlusSquare color={color} size={20} strokeWidth={1.5} />,
         }}
       />
       <Tab.Screen
         name="BroadcastTab"
         component={OrganizerBroadcastScreen}
         options={{
-          tabBarLabel: 'Broadcast',
-          tabBarIcon: ({ color, size }) => <Icon name="notifications" color={color} size={size || 22} />,
+          tabBarLabel: 'ALERTS',
+          tabBarIcon: ({ color }) => <Bell color={color} size={20} strokeWidth={1.5} />,
         }}
       />
       <Tab.Screen
         name="OrganizerProfileTab"
         component={OrganizerProfileScreen}
         options={{
-          tabBarLabel: 'Profile',
-          tabBarIcon: ({ color, size }) => <Icon name="profile" color={color} size={size || 22} />,
+          tabBarLabel: 'PROFILE',
+          tabBarIcon: ({ color }) => <User color={color} size={20} strokeWidth={1.5} />,
         }}
       />
     </Tab.Navigator>

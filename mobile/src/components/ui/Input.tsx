@@ -1,154 +1,88 @@
 import React, { useState } from 'react';
-import {
-  View,
-  TextInput,
-  Text,
-  StyleSheet,
-  TextInputProps,
-  TouchableOpacity,
-  ViewStyle,
-  TextStyle,
-} from 'react-native';
-import { colors, typography, spacing, borderRadius } from '../../theme';
+import { View, Text, TextInput, StyleSheet, TextInputProps } from 'react-native';
+import { AlertTriangle } from 'lucide-react-native';
+import { colors, typography } from '../../theme';
 
-export interface InputProps extends TextInputProps {
-  label?: string;
+interface InputProps extends TextInputProps {
+  label: string;
   error?: string;
-  helperText?: string;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
-  containerStyle?: ViewStyle;
-  inputStyle?: TextStyle;
-  isPassword?: boolean;
 }
 
-export const Input: React.FC<InputProps> = ({
-  label,
-  error,
-  helperText,
-  leftIcon,
-  rightIcon,
-  containerStyle,
-  inputStyle,
-  isPassword = false,
-  secureTextEntry,
-  onFocus,
-  onBlur,
-  ...rest
-}) => {
+export const Input = ({ label, error, style, onFocus, onBlur, ...props }: InputProps) => {
   const [isFocused, setIsFocused] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-
-  const isSecured = isPassword ? !showPassword : secureTextEntry;
 
   return (
-    <View style={[styles.container, containerStyle]}>
-      {label && <Text style={styles.label}>{label}</Text>}
-
-      <View
+    <View style={styles.container}>
+      <Text style={[typography.label, styles.label, isFocused && styles.labelFocused, !!error && styles.labelError]}>
+        {label}
+      </Text>
+      <TextInput
         style={[
-          styles.inputContainer,
+          styles.input,
           isFocused && styles.inputFocused,
-          error ? styles.inputError : null,
+          !!error && styles.inputError,
+          style
         ]}
-      >
-        {leftIcon && <View style={styles.iconContainer}>{leftIcon}</View>}
-
-        <TextInput
-          style={[styles.input, inputStyle]}
-          placeholderTextColor={colors.inputPlaceholder}
-          secureTextEntry={isSecured}
-          onFocus={(e) => {
-            setIsFocused(true);
-            onFocus?.(e);
-          }}
-          onBlur={(e) => {
-            setIsFocused(false);
-            onBlur?.(e);
-          }}
-          {...rest}
-        />
-
-        {isPassword && (
-          <TouchableOpacity
-            activeOpacity={0.7}
-            style={styles.eyeButton}
-            onPress={() => setShowPassword(!showPassword)}
-            accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
-          >
-            <Text style={styles.eyeText}>{showPassword ? 'HIDE' : 'SHOW'}</Text>
-          </TouchableOpacity>
-        )}
-
-        {!isPassword && rightIcon && <View style={styles.iconContainer}>{rightIcon}</View>}
-      </View>
-
-      {error ? (
-        <Text style={styles.errorText}>{error}</Text>
-      ) : helperText ? (
-        <Text style={styles.helperText}>{helperText}</Text>
-      ) : null}
+        onFocus={(e) => {
+          setIsFocused(true);
+          if (onFocus) onFocus(e);
+        }}
+        onBlur={(e) => {
+          setIsFocused(false);
+          if (onBlur) onBlur(e);
+        }}
+        placeholderTextColor={colors.textDim}
+        selectionColor={colors.accent}
+        {...props}
+      />
+      {error && (
+        <View style={styles.errorContainer}>
+          <AlertTriangle size={14} color={colors.accent} />
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: spacing.md,
-    width: '100%',
+    marginBottom: 16,
   },
   label: {
-    ...typography.captionBold,
-    color: colors.textSecondary,
-    marginBottom: spacing.xs,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    color: colors.textMuted,
+    marginBottom: 8,
   },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.inputBackground,
-    borderWidth: 1,
-    borderColor: colors.inputBorder,
-    borderRadius: borderRadius.md,
-    paddingHorizontal: spacing.md,
-    minHeight: 48,
+  labelFocused: {
+    color: colors.accent,
   },
-  inputFocused: {
-    borderColor: colors.inputFocusBorder,
-    backgroundColor: colors.surface,
-  },
-  inputError: {
-    borderColor: colors.error,
+  labelError: {
+    color: colors.accent,
   },
   input: {
-    flex: 1,
+    height: 52,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.surface,
+    color: colors.text,
+    paddingHorizontal: 16,
     ...typography.body,
-    color: colors.textPrimary,
-    paddingVertical: spacing.sm,
   },
-  iconContainer: {
-    marginRight: spacing.sm,
-    justifyContent: 'center',
+  inputFocused: {
+    borderColor: colors.accent,
+  },
+  inputError: {
+    borderColor: colors.accent,
+  },
+  errorContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-  },
-  eyeButton: {
-    paddingHorizontal: spacing.xs,
-    paddingVertical: spacing.xs,
-  },
-  eyeText: {
-    ...typography.captionBold,
-    color: colors.primaryLight,
-    fontSize: 11,
+    marginTop: 8,
   },
   errorText: {
-    ...typography.caption,
-    color: colors.error,
-    marginTop: spacing.xs,
-  },
-  helperText: {
-    ...typography.caption,
-    color: colors.textMuted,
-    marginTop: spacing.xs,
-  },
+    ...typography.micro,
+    color: colors.accent,
+    marginLeft: 6,
+    textTransform: 'none',
+  }
 });

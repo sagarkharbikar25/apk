@@ -1,300 +1,222 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  TouchableOpacity,
-} from 'react-native';
+import { View, StyleSheet, Text, KeyboardAvoidingView, Platform, ScrollView, Pressable } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { Screen, Eyebrow, Headline, Input, Button, GhostWord } from '../../components/ui';
+import { useAuthStore } from '../../store/authStore';
+import { colors, typography } from '../../theme';
+import { UserPlus } from 'lucide-react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AuthStackParamList } from '../../navigation/types';
-import { registerSchema, RegisterFormData } from './validation';
-import { useAuthStore } from '../../store/authStore';
-import { Button, Input, Card } from '../../components/ui';
-import { colors, typography, spacing, borderRadius } from '../../theme';
+import * as z from 'zod';
 
-type Props = NativeStackScreenProps<AuthStackParamList, 'Register'>;
+const schema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  role: z.enum(['student', 'organizer']),
+  organizerCode: z.string().optional(),
+}).refine(data => {
+  if (data.role === 'organizer' && !data.organizerCode) return false;
+  return true;
+}, {
+  message: 'Organizer code is required for organizers',
+  path: ['organizerCode'],
+});
 
-export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
-  const { register, isLoading, error, clearError } = useAuthStore();
+type FormData = z.infer<typeof schema>;
 
-  const {
-    control,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: {
-      name: '',
-      email: '',
-      password: '',
-      role: 'student',
-    },
+export const RegisterScreen = () => {
+  const navigation = useNavigation<any>();
+  const register = useAuthStore((s) => s.register);
+  const isLoading = useAuthStore((s) => s.isLoading);
+  const globalError = useAuthStore((s) => s.error);
+
+  const { control, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: { role: 'student' }
   });
 
-  const selectedRole = watch('role');
+  const role = watch('role');
 
-  const onSubmit = async (data: RegisterFormData) => {
-    clearError();
-    const result = await register(data);
-    if (result.success) {
-      if (result.requiresVerification) {
+  const onSubmit = async (data: FormData) => {
+    const res = await register(data);
+    if (res.success) {
+      if (res.requiresVerification) {
         navigation.navigate('VerifyEmail', { email: data.email });
       }
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
+    <Screen withRain="static">
+      <GhostWord word="INIT" />
+      <KeyboardAvoidingView 
+        style={styles.container} 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.header}>
-          <Text style={styles.brandTitle}>SkillSync</Text>
-          <Text style={styles.subtitle}>Join Your Campus Innovation Network</Text>
-        </View>
-
-        <Card variant="elevated" style={styles.card}>
-          <Text style={styles.cardTitle}>Create Account</Text>
-          <Text style={styles.cardSubtitle}>Get matched with projects & hackathon teams</Text>
-
-          {error && (
-            <View style={styles.errorBanner}>
-              <Text style={styles.errorBannerText}>{error}</Text>
-            </View>
-          )}
-
-          <Controller
-            control={control}
-            name="name"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Input
-                label="Full Name"
-                placeholder="Alex Johnson"
-                autoCapitalize="words"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={errors.name?.message}
-              />
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Input
-                label="College Email"
-                placeholder="alex@college.edu"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={errors.email?.message}
-              />
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Input
-                label="Password (min 6 chars)"
-                placeholder="••••••••"
-                isPassword={true}
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={errors.password?.message}
-              />
-            )}
-          />
-
-          {/* Role Selector Pill */}
-          <Text style={styles.roleLabel}>I AM JOINING AS A</Text>
-          <View style={styles.roleContainer}>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={[
-                styles.roleOption,
-                selectedRole === 'student' && styles.roleOptionActive,
-              ]}
-              onPress={() => setValue('role', 'student')}
-            >
-              <Text
-                style={[
-                  styles.roleText,
-                  selectedRole === 'student' && styles.roleTextActive,
-                ]}
-              >
-                Student / Hacker
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={[
-                styles.roleOption,
-                selectedRole === 'organizer' && styles.roleOptionActive,
-              ]}
-              onPress={() => setValue('role', 'organizer')}
-            >
-              <Text
-                style={[
-                  styles.roleText,
-                  selectedRole === 'organizer' && styles.roleTextActive,
-                ]}
-              >
-                Hackathon Organizer
-              </Text>
-            </TouchableOpacity>
+        <ScrollView contentContainerStyle={styles.scroll}>
+          <View style={styles.header}>
+            <Eyebrow label="NEW CLEARANCE" style={styles.mb} />
+            <Headline accent="PROFILE.">CREATE</Headline>
           </View>
 
-          {selectedRole === 'organizer' && (
+          <View style={styles.form}>
+            {!!globalError && (
+              <Text style={styles.errorText}>{'// '}{globalError}</Text>
+            )}
+
+            <View style={styles.roleToggle}>
+              <Pressable 
+                style={[styles.roleBtn, role === 'student' && styles.roleBtnActive]} 
+                onPress={() => setValue('role', 'student')}
+              >
+                <Text style={[styles.roleText, role === 'student' && styles.roleTextActive]}>STUDENT</Text>
+              </Pressable>
+              <Pressable 
+                style={[styles.roleBtn, role === 'organizer' && styles.roleBtnActive]} 
+                onPress={() => setValue('role', 'organizer')}
+              >
+                <Text style={[styles.roleText, role === 'organizer' && styles.roleTextActive]}>ORGANISER</Text>
+              </Pressable>
+            </View>
+
             <Controller
               control={control}
-              name="organizerCode"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  label="Organizer Invite Code"
-                  placeholder="Enter secret invite code"
-                  autoCapitalize="characters"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.organizerCode?.message}
+              name="name"
+              render={({ field: { onChange, value } }) => (
+                <Input 
+                  label="OPERATOR DESIGNATION (NAME)" 
+                  value={value} 
+                  onChangeText={onChange} 
+                  error={errors.name?.message}
                 />
               )}
             />
-          )}
 
-          <Button
-            title="Create Account"
-            onPress={() => handleSubmit(onSubmit)()}
-            isLoading={isLoading}
-            style={styles.submitBtn}
-          />
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, value } }) => (
+                <Input 
+                  label="CONTACT COMM (EMAIL)" 
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={value} 
+                  onChangeText={onChange} 
+                  error={errors.email?.message}
+                />
+              )}
+            />
 
-          <View style={styles.footerRow}>
-            <Text style={styles.footerText}>Already have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text style={styles.linkText}>Sign In</Text>
-            </TouchableOpacity>
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, value } }) => (
+                <Input 
+                  label="SECURITY PHRASE" 
+                  secureTextEntry
+                  value={value} 
+                  onChangeText={onChange} 
+                  error={errors.password?.message}
+                />
+              )}
+            />
+
+            {role === 'organizer' && (
+              <Controller
+                control={control}
+                name="organizerCode"
+                render={({ field: { onChange, value } }) => (
+                  <Input 
+                    label="AUTHORISATION CODE" 
+                    value={value} 
+                    onChangeText={onChange} 
+                    error={errors.organizerCode?.message}
+                  />
+                )}
+              />
+            )}
+
+            <Button 
+              label={isLoading ? "PROCESSING..." : "REQUEST CLEARANCE"} 
+              icon={UserPlus}
+              onPress={handleSubmit(onSubmit)}
+              disabled={isLoading}
+              style={styles.submit}
+            />
           </View>
-        </Card>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+          <View style={styles.footer}>
+            <Text style={styles.mutedText}>ALREADY REGISTERED?</Text>
+            <Button 
+              variant="ghost" 
+              label="RETURN TO LOGIN" 
+              onPress={() => navigation.goBack()}
+            />
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </Screen>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
   },
-  scrollContent: {
+  scroll: {
     flexGrow: 1,
-    justifyContent: 'center',
-    padding: spacing.lg,
+    padding: 24,
+    paddingTop: 80,
+  },
+  mb: {
+    marginBottom: 24,
   },
   header: {
-    alignItems: 'center',
-    marginBottom: spacing.xl,
+    marginBottom: 32,
   },
-  brandTitle: {
-    ...typography.h1,
-    color: colors.primaryLight,
+  form: {
+    marginBottom: 48,
   },
-  subtitle: {
-    ...typography.body,
-    color: colors.textSecondary,
-    marginTop: spacing.xs,
-    textAlign: 'center',
+  errorText: {
+    ...typography.micro,
+    color: colors.accent,
+    marginBottom: 16,
   },
-  card: {
-    padding: spacing.xl,
-  },
-  cardTitle: {
-    ...typography.h2,
-    color: colors.textPrimary,
-  },
-  cardSubtitle: {
-    ...typography.caption,
-    color: colors.textMuted,
-    marginBottom: spacing.lg,
-  },
-  errorBanner: {
-    backgroundColor: colors.errorSubtle,
-    borderWidth: 1,
-    borderColor: colors.error,
-    borderRadius: spacing.sm,
-    padding: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  errorBannerText: {
-    ...typography.captionBold,
-    color: colors.error,
-    textAlign: 'center',
-  },
-  roleLabel: {
-    ...typography.captionBold,
-    color: colors.textSecondary,
-    marginBottom: spacing.xs,
-    letterSpacing: 0.5,
-  },
-  roleContainer: {
+  roleToggle: {
     flexDirection: 'row',
-    backgroundColor: colors.inputBackground,
-    borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.inputBorder,
-    padding: spacing.xxs,
-    marginBottom: spacing.md,
+    borderColor: colors.line,
+    marginBottom: 24,
   },
-  roleOption: {
+  roleBtn: {
     flex: 1,
-    paddingVertical: spacing.sm,
+    height: 48,
+    justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: borderRadius.sm,
+    backgroundColor: colors.surface,
   },
-  roleOptionActive: {
-    backgroundColor: colors.primary,
+  roleBtnActive: {
+    backgroundColor: colors.accentDim,
   },
   roleText: {
-    ...typography.captionBold,
-    color: colors.textMuted,
+    ...typography.label,
+    color: colors.textDim,
   },
   roleTextActive: {
-    color: colors.textPrimary,
+    color: colors.accent,
   },
-  submitBtn: {
-    marginTop: spacing.md,
+  submit: {
+    marginTop: 16,
   },
-  footerRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: spacing.lg,
+  footer: {
+    alignItems: 'center',
+    marginTop: 'auto',
+    paddingBottom: 24,
   },
-  footerText: {
-    ...typography.body,
-    color: colors.textSecondary,
-  },
-  linkText: {
-    ...typography.bodyBold,
-    color: colors.primaryLight,
-  },
+  mutedText: {
+    ...typography.micro,
+    color: colors.textMuted,
+    marginBottom: 8,
+  }
 });
