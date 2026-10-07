@@ -5,6 +5,7 @@ import {
   BadRequestException,
   NotFoundException,
   ForbiddenException,
+  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -22,7 +23,8 @@ const OTP_TTL_SECONDS = 600; // 10 minutes
 const REFRESH_TTL_DAYS = 7;
 
 function generateOtp(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  // crypto.randomInt is CSPRNG — Math.random() is NOT safe for OTPs
+  return crypto.randomInt(100000, 999999).toString();
 }
 
 function hashToken(token: string): string {
@@ -31,6 +33,8 @@ function hashToken(token: string): string {
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
@@ -77,12 +81,16 @@ export class AuthService {
     await this.redis.setEx(`otp:${dto.email}`, OTP_TTL_SECONDS, otp);
 
     const isDev = this.configService.get<string>('NODE_ENV') !== 'production';
-    console.log(`[DEV] OTP for ${dto.email}: ${otp}`);
+    // Never log OTP in production — enumeration / data leak risk
+    if (isDev) {
+      this.logger.debug(`[DEV ONLY] OTP for ${dto.email}: ${otp}`);
+    }
 
     return {
       message: 'Registration successful. Check your email for the OTP.',
       userId: user.id,
-      otp: isDev ? otp : undefined,
+      // Never return OTP in prod — only for local dev convenience
+      ...(isDev && { otp }),
     };
   }
 
@@ -193,17 +201,26 @@ export class AuthService {
   // ── Resend Verification ───────────────────────────────────────
   async resendVerification(email: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) throw new NotFoundException('User not found');
-    if (user.emailVerified) {
-      throw new BadRequestException('Email already verified');
+    // Always return same message — prevents user enumeration attacks
+    if (!user || user.emailVerified) {
+      return { message: 'If this email is registered and unverified, a new OTP has been sent.' };
+    }
+
+    // Rate-limit: if OTP already exists in Redis, block resend to prevent flooding
+    const existing = await this.redis.get(`otp:${email}`);
+    if (existing) {
+      throw new BadRequestException('Please wait before requesting a new OTP.');
     }
 
     const otp = generateOtp();
     await this.redis.setEx(`otp:${email}`, OTP_TTL_SECONDS, otp);
 
-    console.log(`[DEV] Resend OTP for ${email}: ${otp}`);
+    const isDev = this.configService.get<string>('NODE_ENV') !== 'production';
+    if (isDev) {
+      this.logger.debug(`[DEV ONLY] Resend OTP for ${email}: ${otp}`);
+    }
 
-    return { message: 'OTP resent successfully' };
+    return { message: 'If this email is registered and unverified, a new OTP has been sent.' };
   }
 
   // ── Private: Generate Token Pair ─────────────────────────────

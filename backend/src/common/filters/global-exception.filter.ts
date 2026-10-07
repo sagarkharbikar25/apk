@@ -38,8 +38,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         }
       }
     } else if (exception instanceof Error) {
-      this.logger.error(exception.message, exception.stack);
-      message = exception.message;
+      // Log full detail server-side only — NEVER send raw error to client (data leak)
+      this.logger.error(`[Unhandled] ${exception.message}`, exception.stack);
+      message = 'An unexpected error occurred. Please try again later.';
     }
 
     response.status(statusCode).json({

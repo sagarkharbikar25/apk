@@ -18,7 +18,6 @@ export class UsersService {
         emailVerified: true,
         profile: true,
         userSkills: { include: { skill: true } },
-        availability: true,
       },
     });
   }
@@ -44,7 +43,6 @@ export class UsersService {
         user: {
           select: {
             userSkills: { include: { skill: true } },
-            availability: true,
           },
         },
       },

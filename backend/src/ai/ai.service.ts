@@ -425,8 +425,7 @@ export class AiService {
         members: {
           include: {
             user: {
-              select: {
-                id: true,
+              include: {
                 profile: true,
                 userSkills: { include: { skill: true } },
               },

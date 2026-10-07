@@ -99,6 +99,7 @@ describe('HackathonsService', () => {
       mockPrisma.hackathon.findUnique.mockResolvedValue(validHackathon);
       mockPrisma.hackathonRegistration.findUnique.mockResolvedValue({ id: 'hp1' });
 
+      await expect(service.register('u1', 'h1', {})).rejects.toThrow(ConflictException);
     });
   });
 });
