@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Animated, Easing, AccessibilityInfo, Dimensions } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import { colors } from '../../theme';
@@ -8,7 +8,7 @@ interface DigitRainProps {
   animated?: boolean;
 }
 
-const { width, height } = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 const COLUMNS = 14;
 const ROWS = 40;
 

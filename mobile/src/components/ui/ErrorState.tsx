@@ -11,7 +11,7 @@ interface ErrorStateProps {
 export const ErrorState = ({ message = 'SOMETHING WENT WRONG', onRetry }: ErrorStateProps) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>// REQUEST FAILED</Text>
+      <Text style={styles.label}>{'// REQUEST FAILED'}</Text>
       <Text style={styles.message}>{message}</Text>
       <Button 
         variant="outline" 

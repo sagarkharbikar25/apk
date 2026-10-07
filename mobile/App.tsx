@@ -1,14 +1,17 @@
 import React from 'react';
-import { LogBox } from 'react-native';
+import { StatusBar, LogBox } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { ComponentGallery } from './src/screens/dev/ComponentGallery';
+import { RootNavigator } from './src/navigation';
+import { OfflineBanner } from './src/components/offline/OfflineBanner';
 
 LogBox.ignoreAllLogs(true);
 
 function App(): React.JSX.Element {
   return (
     <SafeAreaProvider>
-      <ComponentGallery />
+      <StatusBar barStyle="light-content" />
+      <OfflineBanner />
+      <RootNavigator />
     </SafeAreaProvider>
   );
 }

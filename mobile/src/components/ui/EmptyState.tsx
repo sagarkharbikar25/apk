@@ -15,7 +15,7 @@ export const EmptyState = ({ icon: Icon, label, actionLabel, onAction }: EmptySt
   return (
     <View style={styles.container}>
       <Icon size={48} color={colors.textDim} strokeWidth={1} style={styles.icon} />
-      <Text style={styles.label}>// {label}</Text>
+      <Text style={styles.label}>{'// '}{label}</Text>
       {actionLabel && onAction && (
         <Button 
           variant="outline" 

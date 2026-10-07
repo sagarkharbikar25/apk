@@ -42,7 +42,7 @@ export const ScoreBreakdown = (props: ScoreBreakdownProps) => {
   return (
     <Pressable onPress={() => setExpanded(!expanded)} style={styles.container}>
       <Text style={[typography.micro, styles.matchLabel]}>
-        // MATCH  {props.totalScore}%
+        {'// MATCH  '}{props.totalScore}%
       </Text>
       
       {expanded && (
@@ -76,7 +76,7 @@ export const ScoreBreakdown = (props: ScoreBreakdownProps) => {
           
           {props.aiNote && (
             <Text style={styles.aiNote}>
-              // AI NOTE  {props.aiNote}
+              {'// AI NOTE  '}{props.aiNote}
             </Text>
           )}
         </View>

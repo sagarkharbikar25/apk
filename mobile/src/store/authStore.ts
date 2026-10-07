@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { apiClient, setupApiClientAuth } from '../api/client';
+import * as Keychain from 'react-native-keychain';
+import { apiClient, setupApiClientAuth } from '../api';
 import { User, AuthResponse, AuthTokens } from '../api/types';
 
 export interface AuthState {
@@ -8,10 +9,12 @@ export interface AuthState {
   refreshToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isInitializing: boolean;
   error: string | null;
   pendingRegistration?: { name: string; email: string; role: 'student' | 'organizer' } | null;
 
   // Actions
+  initAuth: () => Promise<void>;
   login: (email: string, password: string) => Promise<boolean>;
   register: (data: {
     name: string;
@@ -22,29 +25,46 @@ export interface AuthState {
   }) => Promise<{ success: boolean; requiresVerification: boolean }>;
   verifyEmail: (email: string, otp: string) => Promise<boolean>;
   resendOtp: (email: string) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   setUser: (user: User) => void;
-  setTokens: (tokens: AuthTokens) => void;
-  setSession: (user: User, tokens: AuthTokens) => void;
+  setTokens: (tokens: AuthTokens) => Promise<void>;
+  setSession: (user: User, tokens: AuthTokens) => Promise<void>;
   clearError: () => void;
 }
 
+const SECURE_STORE_KEYS = {
+  ACCESS_TOKEN: 'skillsync_access_token',
+  REFRESH_TOKEN: 'skillsync_refresh_token',
+  USER_DATA: 'skillsync_user_data',
+};
+
+// Generic keychain helpers
+const saveSecure = async (key: string, value: string) => {
+  try { await Keychain.setGenericPassword(key, value, { service: key }); } catch {}
+};
+const loadSecure = async (key: string) => {
+  try {
+    const creds = await Keychain.getGenericPassword({ service: key });
+    return creds ? creds.password : null;
+  } catch {
+    return null;
+  }
+};
+const clearSecure = async (key: string) => {
+  try { await Keychain.resetGenericPassword({ service: key }); } catch {}
+};
+
 export const useAuthStore = create<AuthState>((set, get) => {
-  // Initialize apiClient interceptor callback
   setupApiClientAuth(
     () => ({
-      accessToken: get()?.accessToken || null,
-      refreshToken: get()?.refreshToken || null,
+      accessToken: get().accessToken,
+      refreshToken: get().refreshToken,
     }),
-    (tokens: AuthTokens) => {
-      set({
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
-      });
+    async (tokens: AuthTokens) => {
+      await get().setTokens(tokens);
     },
-    () => {
-      // Auth failed completely (refresh token expired)
-      get()?.logout();
+    async () => {
+      await get().logout();
     }
   );
 
@@ -54,7 +74,31 @@ export const useAuthStore = create<AuthState>((set, get) => {
     refreshToken: null,
     isAuthenticated: false,
     isLoading: false,
+    isInitializing: true,
     error: null,
+
+    initAuth: async () => {
+      try {
+        const [access, refresh, userData] = await Promise.all([
+          loadSecure(SECURE_STORE_KEYS.ACCESS_TOKEN),
+          loadSecure(SECURE_STORE_KEYS.REFRESH_TOKEN),
+          loadSecure(SECURE_STORE_KEYS.USER_DATA)
+        ]);
+
+        if (access && refresh && userData) {
+          set({
+            accessToken: access,
+            refreshToken: refresh,
+            user: JSON.parse(userData),
+            isAuthenticated: true,
+          });
+        }
+      } catch (err) {
+        console.error('Failed to init auth state', err);
+      } finally {
+        set({ isInitializing: false });
+      }
+    },
 
     login: async (email: string, password: string) => {
       set({ isLoading: true, error: null });
@@ -65,18 +109,11 @@ export const useAuthStore = create<AuthState>((set, get) => {
         });
 
         const { accessToken, refreshToken, user } = response.data;
-
-        set({
-          accessToken,
-          refreshToken,
-          user,
-          isAuthenticated: true,
-          isLoading: false,
-          error: null,
-        });
+        await get().setSession(user, { accessToken, refreshToken });
+        set({ isLoading: false });
         return true;
       } catch (err: any) {
-        // Offline demo fallback for emulator testing when backend is offline
+        // Fallback for emulator offline testing
         if (err.message === 'Network Error' || !err.response) {
           const isOrganizer = email.toLowerCase().includes('organizer');
           const demoUser: User = {
@@ -87,23 +124,13 @@ export const useAuthStore = create<AuthState>((set, get) => {
             isVerified: true,
             createdAt: new Date().toISOString(),
           };
-          set({
-            accessToken: 'offline-demo-access-token',
-            refreshToken: 'offline-demo-refresh-token',
-            user: demoUser,
-            isAuthenticated: true,
-            isLoading: false,
-            error: null,
-          });
+          await get().setSession(demoUser, { accessToken: 'demo-access', refreshToken: 'demo-refresh' });
+          set({ isLoading: false });
           return true;
         }
 
-        const message =
-          err.response?.data?.message || err.message || 'Login failed. Please check your credentials.';
-        set({
-          isLoading: false,
-          error: Array.isArray(message) ? message[0] : message,
-        });
+        const message = err.response?.data?.message || err.message || 'Login failed.';
+        set({ isLoading: false, error: Array.isArray(message) ? message[0] : message });
         return false;
       }
     },
@@ -129,7 +156,6 @@ export const useAuthStore = create<AuthState>((set, get) => {
           requiresVerification: response.data?.requiresVerification !== false,
         };
       } catch (err: any) {
-        // Offline demo fallback: smoothly navigate to OTP verification with user's selected role
         if (err.message === 'Network Error' || !err.response) {
           set({
             pendingRegistration: { name: data.name, email: data.email, role: data.role },
@@ -139,12 +165,8 @@ export const useAuthStore = create<AuthState>((set, get) => {
           return { success: true, requiresVerification: true };
         }
 
-        const message =
-          err.response?.data?.message || err.message || 'Registration failed.';
-        set({
-          isLoading: false,
-          error: Array.isArray(message) ? message[0] : message,
-        });
+        const message = err.response?.data?.message || err.message || 'Registration failed.';
+        set({ isLoading: false, error: Array.isArray(message) ? message[0] : message });
         return { success: false, requiresVerification: false };
       }
     },
@@ -158,19 +180,10 @@ export const useAuthStore = create<AuthState>((set, get) => {
         });
 
         const { accessToken, refreshToken, user } = response.data;
-
-        set({
-          accessToken: accessToken || null,
-          refreshToken: refreshToken || null,
-          user: user || null,
-          isAuthenticated: !!accessToken,
-          isLoading: false,
-          error: null,
-          pendingRegistration: null,
-        });
+        await get().setSession(user, { accessToken, refreshToken });
+        set({ isLoading: false, pendingRegistration: null });
         return true;
       } catch (err: any) {
-        // Offline demo fallback: complete email verification and set session with the exact chosen role
         if (err.message === 'Network Error' || !err.response) {
           const pending = get().pendingRegistration;
           const userRole = pending?.role || (email.toLowerCase().includes('organizer') ? 'organizer' : 'student');
@@ -184,67 +197,59 @@ export const useAuthStore = create<AuthState>((set, get) => {
             createdAt: new Date().toISOString(),
           };
 
-          set({
-            accessToken: 'offline-demo-access-token',
-            refreshToken: 'offline-demo-refresh-token',
-            user: demoUser,
-            isAuthenticated: true,
-            isLoading: false,
-            error: null,
-            pendingRegistration: null,
-          });
+          await get().setSession(demoUser, { accessToken: 'demo-access', refreshToken: 'demo-refresh' });
+          set({ isLoading: false, pendingRegistration: null });
           return true;
         }
 
-        const message =
-          err.response?.data?.message || err.message || 'Invalid or expired OTP code.';
-        set({
-          isLoading: false,
-          error: Array.isArray(message) ? message[0] : message,
-        });
+        const message = err.response?.data?.message || err.message || 'Invalid or expired OTP.';
+        set({ isLoading: false, error: Array.isArray(message) ? message[0] : message });
         return false;
       }
     },
 
     resendOtp: async (email: string) => {
       try {
-        await apiClient.post('/auth/resend-otp', {
-          email: email.trim().toLowerCase(),
-        });
+        await apiClient.post('/auth/resend-otp', { email: email.trim().toLowerCase() });
         return true;
       } catch (err: any) {
-        if (err.message === 'Network Error' || !err.response) {
-          return true;
-        }
-        const message =
-          err.response?.data?.message || err.message || 'Failed to resend OTP.';
+        if (err.message === 'Network Error' || !err.response) return true;
+        const message = err.response?.data?.message || err.message || 'Failed to resend OTP.';
         set({ error: Array.isArray(message) ? message[0] : message });
         return false;
       }
     },
 
-    logout: () => {
-      set({
-        user: null,
-        accessToken: null,
-        refreshToken: null,
-        isAuthenticated: false,
-        error: null,
-      });
+    logout: async () => {
+      try {
+        await Promise.all([
+          clearSecure(SECURE_STORE_KEYS.ACCESS_TOKEN),
+          clearSecure(SECURE_STORE_KEYS.REFRESH_TOKEN),
+          clearSecure(SECURE_STORE_KEYS.USER_DATA)
+        ]);
+      } catch {}
+      set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false, error: null });
     },
 
-    setUser: (user: User) => {
+    setUser: async (user: User) => {
+      await saveSecure(SECURE_STORE_KEYS.USER_DATA, JSON.stringify(user));
       set({ user });
     },
 
-    setTokens: (tokens: AuthTokens) => {
-      set({
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
-      });
+    setTokens: async (tokens: AuthTokens) => {
+      await Promise.all([
+        saveSecure(SECURE_STORE_KEYS.ACCESS_TOKEN, tokens.accessToken),
+        saveSecure(SECURE_STORE_KEYS.REFRESH_TOKEN, tokens.refreshToken)
+      ]);
+      set({ accessToken: tokens.accessToken, refreshToken: tokens.refreshToken });
     },
 
-    setSession: (user: User, tokens: AuthTokens) => {
+    setSession: async (user: User, tokens: AuthTokens) => {
+      await Promise.all([
+        saveSecure(SECURE_STORE_KEYS.USER_DATA, JSON.stringify(user)),
+        saveSecure(SECURE_STORE_KEYS.ACCESS_TOKEN, tokens.accessToken),
+        saveSecure(SECURE_STORE_KEYS.REFRESH_TOKEN, tokens.refreshToken)
+      ]);
       set({
         user,
         accessToken: tokens.accessToken,
@@ -254,8 +259,6 @@ export const useAuthStore = create<AuthState>((set, get) => {
       });
     },
 
-    clearError: () => {
-      set({ error: null });
-    },
+    clearError: () => set({ error: null }),
   };
 });

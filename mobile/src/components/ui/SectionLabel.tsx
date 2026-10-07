@@ -9,7 +9,7 @@ interface SectionLabelProps extends TextProps {
 export const SectionLabel = ({ label, style, ...props }: SectionLabelProps) => {
   return (
     <Text style={[typography.micro, styles.label, style]} {...props}>
-      // {label}
+      {'// '}{label}
     </Text>
   );
 };

@@ -8,7 +8,7 @@ export const OfflineBanner = () => {
   
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <Text style={styles.text}>// OFFLINE — SHOWING SAVED DATA</Text>
+      <Text style={styles.text}>{'// OFFLINE — SHOWING SAVED DATA'}</Text>
     </View>
   );
 };
