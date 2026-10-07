@@ -1,159 +1,126 @@
-import React from 'react';
-import {
-  TouchableOpacity,
-  Text,
-  ActivityIndicator,
-  StyleSheet,
-  ViewStyle,
-  TextStyle,
-  TouchableOpacityProps,
-} from 'react-native';
-import { colors, typography, spacing, borderRadius } from '../../theme';
+import React, { useRef } from 'react';
+import { Pressable, Text, StyleSheet, Animated, PressableProps, ViewStyle, TextStyle } from 'react-native';
+import { LucideIcon } from 'lucide-react-native';
+import { colors, typography } from '../../theme';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
-export type ButtonSize = 'sm' | 'md' | 'lg';
-
-export interface ButtonProps extends TouchableOpacityProps {
-  title: string;
-  variant?: ButtonVariant;
-  size?: ButtonSize;
-  isLoading?: boolean;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
+interface ButtonProps extends PressableProps {
+  label: string;
+  variant?: 'primary' | 'outline' | 'ghost';
+  icon?: LucideIcon;
   style?: ViewStyle;
-  textStyle?: TextStyle;
+  labelStyle?: TextStyle;
 }
 
-export const Button: React.FC<ButtonProps> = ({
-  title,
-  variant = 'primary',
-  size = 'md',
-  isLoading = false,
-  disabled = false,
-  leftIcon,
-  rightIcon,
-  style,
-  textStyle,
-  ...rest
-}) => {
-  const isDisabled = disabled || isLoading;
+export const Button = ({ 
+  label, 
+  variant = 'primary', 
+  icon: Icon, 
+  style, 
+  labelStyle,
+  ...props 
+}: ButtonProps) => {
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = (e: any) => {
+    Animated.timing(scale, {
+      toValue: 0.98,
+      duration: 120,
+      useNativeDriver: true,
+    }).start();
+    if (props.onPressIn) props.onPressIn(e);
+  };
+
+  const handlePressOut = (e: any) => {
+    Animated.timing(scale, {
+      toValue: 1,
+      duration: 120,
+      useNativeDriver: true,
+    }).start();
+    if (props.onPressOut) props.onPressOut(e);
+  };
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.8}
-      disabled={isDisabled}
-      style={[
-        styles.base,
-        styles[variant],
-        styles[`size_${size}`],
-        isDisabled && styles.disabled,
-        style,
-      ]}
-      accessibilityRole="button"
-      {...rest}
-    >
-      {isLoading ? (
-        <ActivityIndicator
-          size="small"
-          color={variant === 'outline' || variant === 'ghost' ? colors.primary : colors.textPrimary}
-        />
-      ) : (
-        <>
-          {leftIcon}
-          <Text
-            style={[
-              styles.textBase,
-              styles[`text_${variant}`],
-              styles[`textSize_${size}`],
-              isDisabled && styles.textDisabled,
-              leftIcon ? { marginLeft: spacing.sm } : null,
-              rightIcon ? { marginRight: spacing.sm } : null,
-              textStyle,
-            ]}
-          >
-            {title}
-          </Text>
-          {rightIcon}
-        </>
-      )}
-    </TouchableOpacity>
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <Pressable
+        {...props}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={({ pressed }) => [
+          styles.base,
+          styles[variant],
+          pressed && styles[`${variant}Pressed`],
+          props.disabled && styles.disabled,
+          style,
+        ]}
+      >
+        {Icon && (
+          <Icon 
+            size={20} 
+            color={variant === 'primary' ? '#FFFFFF' : colors.accent} 
+            style={styles.icon}
+          />
+        )}
+        <Text style={[
+          styles.label, 
+          variant === 'primary' ? styles.primaryLabel : styles.accentLabel,
+          props.disabled && styles.disabledLabel,
+          labelStyle
+        ]}>
+          {label}
+        </Text>
+      </Pressable>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   base: {
+    height: 52,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: borderRadius.md,
+    paddingHorizontal: 24,
   },
-  // Sizes
-  size_sm: {
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.md,
-    minHeight: 34,
-  },
-  size_md: {
-    paddingVertical: spacing.sm + 2,
-    paddingHorizontal: spacing.lg,
-    minHeight: 46,
-  },
-  size_lg: {
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.xl,
-    minHeight: 54,
-  },
-  // Variants
   primary: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.accentSolid,
   },
-  secondary: {
-    backgroundColor: colors.secondary,
+  primaryPressed: {
+    backgroundColor: '#C00F3E', // Darker shade of accentSolid
   },
   outline: {
     backgroundColor: 'transparent',
-    borderWidth: 1.5,
-    borderColor: colors.primary,
+    borderWidth: 1,
+    borderColor: colors.accent,
+  },
+  outlinePressed: {
+    backgroundColor: colors.accentDim,
   },
   ghost: {
     backgroundColor: 'transparent',
   },
-  danger: {
-    backgroundColor: colors.error,
+  ghostPressed: {
+    backgroundColor: colors.surface2,
   },
   disabled: {
     opacity: 0.5,
   },
-  // Text
-  textBase: {
-    ...typography.button,
-    textAlign: 'center',
+  icon: {
+    marginRight: 8,
   },
-  textSize_sm: {
-    fontSize: 13,
+  label: {
+    fontFamily: typography.label.fontFamily, // Rajdhani-SemiBold
+    fontSize: 14,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+    includeFontPadding: false,
   },
-  textSize_md: {
-    fontSize: 15,
+  primaryLabel: {
+    color: '#FFFFFF',
   },
-  textSize_lg: {
-    fontSize: 17,
+  accentLabel: {
+    color: colors.accent,
   },
-  text_primary: {
-    color: colors.textPrimary,
-  },
-  text_secondary: {
-    color: colors.textPrimary,
-  },
-  text_outline: {
-    color: colors.primaryLight,
-  },
-  text_ghost: {
-    color: colors.textSecondary,
-  },
-  text_danger: {
-    color: colors.textPrimary,
-  },
-  textDisabled: {
-    color: colors.textMuted,
-  },
+  disabledLabel: {
+    // Keep base color but container opacity drops
+  }
 });

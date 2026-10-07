@@ -1,52 +1,61 @@
 import { TextStyle } from 'react-native';
 
+export const DISPLAY = 'Orbitron-Black'; 
+export const UI = { medium: 'Rajdhani-Medium', semi: 'Rajdhani-SemiBold', bold: 'Rajdhani-Bold' };
+
 export const typography: Record<string, TextStyle> = {
-  h1: {
+  displayXL: {
+    fontFamily: DISPLAY,
+    fontSize: 40,
+    lineHeight: 40,
+    letterSpacing: -1.6, // -0.04em * 40
+    textTransform: 'uppercase',
+    includeFontPadding: false,
+  },
+  displayL: {
+    fontFamily: DISPLAY,
     fontSize: 28,
-    lineHeight: 34,
-    fontWeight: '700',
-    letterSpacing: -0.5,
+    lineHeight: 30,
+    letterSpacing: -0.84, // -0.03em * 28
+    textTransform: 'uppercase',
+    includeFontPadding: false,
   },
-  h2: {
-    fontSize: 22,
-    lineHeight: 28,
-    fontWeight: '700',
-    letterSpacing: -0.3,
-  },
-  h3: {
-    fontSize: 18,
+  displayM: {
+    fontFamily: DISPLAY,
+    fontSize: 20,
     lineHeight: 24,
-    fontWeight: '600',
+    letterSpacing: -0.4, // -0.02em * 20
+    textTransform: 'uppercase',
+    includeFontPadding: false,
   },
-  subtitle: {
-    fontSize: 15,
-    lineHeight: 20,
-    fontWeight: '500',
+  title: {
+    fontFamily: UI.bold,
+    fontSize: 18,
+    lineHeight: 22,
+    letterSpacing: 0.5,
+    includeFontPadding: false,
   },
   body: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: '400',
+    fontFamily: UI.medium,
+    fontSize: 16,
+    lineHeight: 22,
+    letterSpacing: 0,
+    includeFontPadding: false,
   },
-  bodyBold: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: '600',
-  },
-  caption: {
+  label: {
+    fontFamily: UI.semi,
     fontSize: 12,
     lineHeight: 16,
-    fontWeight: '400',
+    letterSpacing: 2.4,
+    textTransform: 'uppercase',
+    includeFontPadding: false,
   },
-  captionBold: {
-    fontSize: 12,
-    lineHeight: 16,
-    fontWeight: '600',
-  },
-  button: {
-    fontSize: 15,
-    lineHeight: 20,
-    fontWeight: '600',
-    letterSpacing: 0.2,
+  micro: {
+    fontFamily: UI.semi,
+    fontSize: 10,
+    lineHeight: 12,
+    letterSpacing: 2.0,
+    textTransform: 'uppercase',
+    includeFontPadding: false,
   },
 };

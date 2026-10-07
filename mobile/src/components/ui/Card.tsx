@@ -1,75 +1,49 @@
 import React from 'react';
-import {
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  ViewStyle,
-  StyleProp,
-} from 'react-native';
-import { colors, spacing, borderRadius, shadows } from '../../theme';
+import { View, StyleSheet, ViewProps, Pressable } from 'react-native';
+import { colors } from '../../theme';
+import { CornerFrame } from './CornerFrame';
 
-export type CardVariant = 'default' | 'elevated' | 'outlined';
-
-export interface CardProps {
-  children: React.ReactNode;
-  style?: StyleProp<ViewStyle>;
-  variant?: CardVariant;
+interface CardProps extends ViewProps {
+  bracket?: boolean;
   onPress?: () => void;
-  testID?: string;
 }
 
-export const Card: React.FC<CardProps> = ({
-  children,
-  style,
-  variant = 'default',
-  onPress,
-  testID,
-}) => {
-  const cardStyles = [
-    styles.base,
-    styles[variant],
-    style,
-  ];
+export const Card = ({ children, bracket, onPress, style, ...props }: CardProps) => {
+  const content = (
+    <>
+      {children}
+      {bracket && <CornerFrame />}
+    </>
+  );
 
   if (onPress) {
     return (
-      <TouchableOpacity
-        activeOpacity={0.85}
+      <Pressable 
+        style={({ pressed }) => [styles.card, pressed && styles.pressed, style as any]} 
         onPress={onPress}
-        style={cardStyles}
-        testID={testID}
+        {...(props as any)}
       >
-        {children}
-      </TouchableOpacity>
+        {content}
+      </Pressable>
     );
   }
 
   return (
-    <View style={cardStyles} testID={testID}>
-      {children}
+    <View style={[styles.card, style]} {...props}>
+      {content}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  base: {
+  card: {
     backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
     borderWidth: 1,
-    borderColor: colors.surfaceBorder,
+    borderColor: colors.line,
+    padding: 16,
+    position: 'relative',
   },
-  default: {
-    backgroundColor: colors.surface,
-    borderColor: colors.surfaceBorder,
-  },
-  elevated: {
-    backgroundColor: colors.surfaceElevated,
-    borderColor: colors.surfaceBorder,
-    ...shadows.md,
-  },
-  outlined: {
-    backgroundColor: 'transparent',
-    borderColor: colors.surfaceBorder,
+  pressed: {
+    backgroundColor: colors.surface2,
   },
 });
