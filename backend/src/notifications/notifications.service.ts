@@ -117,7 +117,7 @@ export class NotificationsService {
    * Broadcast announcement: DB row first, push second
    */
   async broadcastAnnouncement(hackathonId: string, title: string, body: string) {
-    const participants = await this.prisma.hackathonParticipant.findMany({
+    const participants = await this.prisma.hackathonRegistration.findMany({
       where: { hackathonId },
       include: { user: { select: { id: true, fcmToken: true } } },
     });

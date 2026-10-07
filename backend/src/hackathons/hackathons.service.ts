@@ -42,7 +42,7 @@ export class HackathonsService {
         orderBy: { startDate: 'asc' },
         include: {
           organizer: { select: { id: true, email: true, profile: true } },
-          _count: { select: { participants: true } },
+          _count: { select: { registrations: true } },
         },
       }),
     ]);
@@ -64,13 +64,12 @@ export class HackathonsService {
       where: { id },
       include: {
         organizer: { select: { id: true, email: true, profile: true } },
-        participants: {
+        registrations: {
           include: {
             user: { select: { id: true, profile: true } },
-            team: { select: { id: true, name: true } },
           },
         },
-        _count: { select: { participants: true } },
+        _count: { select: { registrations: true, teams: true } },
       },
     });
 
@@ -100,7 +99,7 @@ export class HackathonsService {
     }
 
     // Check if user is already registered
-    const existing = await this.prisma.hackathonParticipant.findUnique({
+    const existing = await this.prisma.hackathonRegistration.findUnique({
       where: {
         hackathonId_userId: { hackathonId, userId },
       },
@@ -110,34 +109,10 @@ export class HackathonsService {
       throw new ConflictException('You are already registered for this hackathon');
     }
 
-    // If registering with a team, validate team
-    if (dto?.teamId) {
-      const team = await this.prisma.team.findUnique({
-        where: { id: dto.teamId },
-        include: { members: true },
-      });
-
-      if (!team) {
-        throw new NotFoundException(`Team with ID ${dto.teamId} not found`);
-      }
-
-      const isMember = team.members.some((m) => m.userId === userId);
-      if (!isMember) {
-        throw new BadRequestException('You are not a member of this team');
-      }
-
-      if (team.members.length > hackathon.maxTeamSize) {
-        throw new BadRequestException(
-          `Team size (${team.members.length}) exceeds the maximum allowed team size (${hackathon.maxTeamSize}) for this hackathon`,
-        );
-      }
-    }
-
-    return this.prisma.hackathonParticipant.create({
+    return this.prisma.hackathonRegistration.create({
       data: {
         hackathonId,
         userId,
-        teamId: dto?.teamId,
       },
       include: {
         hackathon: { select: { id: true, title: true } },
@@ -164,7 +139,7 @@ export class HackathonsService {
   async update(organizerId: string, id: string, dto: UpdateHackathonDto) {
     const hackathon = await this.prisma.hackathon.findUnique({
       where: { id },
-      include: { participants: { include: { team: { include: { members: true } } } } },
+      include: { teams: { include: { members: true } } },
     });
 
     if (!hackathon) throw new NotFoundException(`Hackathon with ID ${id} not found`);
@@ -175,7 +150,7 @@ export class HackathonsService {
     if (dto.maxTeamSize !== undefined) {
       const maxExistingTeamSize = Math.max(
         0,
-        ...hackathon.participants.map((p) => p.team?.members.length || 0),
+        ...hackathon.teams.map((t) => t.members.length || 0),
       );
       if (dto.maxTeamSize < maxExistingTeamSize) {
         throw new BadRequestException(
@@ -204,7 +179,7 @@ export class HackathonsService {
       where: { organizerId },
       orderBy: { createdAt: 'desc' },
       include: {
-        _count: { select: { participants: true } },
+        _count: { select: { registrations: true, teams: true } },
       },
     });
   }
@@ -219,14 +194,13 @@ export class HackathonsService {
 
     const where: any = {
       hackathonId,
-      ...(query.teamless && { teamId: null }),
+      ...(query.teamless && { user: { teamMembers: { none: { hackathonId } } } }),
     };
 
-    return this.prisma.hackathonParticipant.findMany({
+    return this.prisma.hackathonRegistration.findMany({
       where,
       include: {
         user: { select: { id: true, email: true, profile: true } },
-        team: { select: { id: true, name: true } },
       },
       orderBy: { id: 'asc' },
     });
@@ -241,7 +215,7 @@ export class HackathonsService {
     }
 
     return this.prisma.team.findMany({
-      where: { hackathonParticipants: { some: { hackathonId } }, deletedAt: null },
+      where: { hackathonId, deletedAt: null },
       include: {
         members: {
           include: {
@@ -260,10 +234,15 @@ export class HackathonsService {
       throw new ForbiddenException('Only the hackathon organizer can check in participants');
     }
 
-    const participant = await this.prisma.hackathonParticipant.findUnique({
+    const participant = await this.prisma.hackathonRegistration.findUnique({
       where: { hackathonId_userId: { hackathonId, userId } },
     });
     if (!participant) throw new NotFoundException('Participant not found');
+
+    await this.prisma.hackathonRegistration.update({
+      where: { hackathonId_userId: { hackathonId, userId } },
+      data: { checkedIn },
+    });
 
     return {
       success: true,

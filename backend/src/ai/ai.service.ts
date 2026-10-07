@@ -67,18 +67,26 @@ export class AiService {
     let targetSkillNames: string[] = [];
 
     if (dto.projectId) {
-      const project = await this.prisma.project.findFirst({
-        where: { id: dto.projectId, deletedAt: null },
-        include: {
-          requirements: { include: { skill: true } },
-        },
-      });
+      const teamOrProject: any =
+        (await this.prisma.team.findFirst({
+          where: { id: dto.projectId, deletedAt: null },
+          include: {
+            requiredSkills: { include: { skill: true } },
+          },
+        })) ||
+        (await (this.prisma as any).project?.findFirst({
+          where: { id: dto.projectId, deletedAt: null },
+          include: {
+            requirements: { include: { skill: true } },
+          },
+        }));
 
-      if (!project) {
-        throw new NotFoundException(`Project with ID ${dto.projectId} not found`);
+      if (!teamOrProject) {
+        throw new NotFoundException(`Team/Project with ID ${dto.projectId} not found`);
       }
 
-      targetSkillNames = project.requirements.map((r) => r.skill.name);
+      const reqs: any[] = teamOrProject.requiredSkills || teamOrProject.requirements || [];
+      targetSkillNames = reqs.map((r: any) => r.skill.name);
     } else if (dto.targetSkills && dto.targetSkills.length > 0) {
       targetSkillNames = dto.targetSkills;
     } else {
@@ -152,21 +160,29 @@ export class AiService {
     projectId: string,
     cacheKey: string,
   ) {
-    const project = await this.prisma.project.findFirst({
-      where: { id: projectId, deletedAt: null },
-      include: {
-        requirements: { include: { skill: true } },
-        members: true,
-      },
-    });
+    const project: any =
+      (await (this.prisma as any).project?.findFirst({
+        where: { id: projectId, deletedAt: null },
+        include: {
+          requirements: { include: { skill: true } },
+          members: true,
+        },
+      })) ||
+      (await this.prisma.team.findFirst({
+        where: { id: projectId, deletedAt: null },
+        include: {
+          requiredSkills: { include: { skill: true } },
+          members: true,
+        },
+      }));
 
     if (!project) {
-      throw new NotFoundException(`Project with ID ${projectId} not found`);
+      throw new NotFoundException(`Project/Team with ID ${projectId} not found`);
     }
 
     // Exclude creator and existing project members
-    const existingMemberIds = new Set(project.members.map((m) => m.userId));
-    existingMemberIds.add(project.creatorId);
+    const existingMemberIds = new Set<string>((project.members || []).map((m: any) => m.userId));
+    if (project.creatorId) existingMemberIds.add(project.creatorId);
     existingMemberIds.add(userId);
 
     // Step 1: SQL filter — exclude members, exclude lookingFor = not_looking
@@ -182,14 +198,14 @@ export class AiService {
       include: {
         profile: true,
         userSkills: { include: { skill: true } },
-        availability: true,
       },
       take: 50,
     });
 
-    const projectSkillIds = new Set(project.requirements.map((r) => r.skillId));
+    const rawReqs: any[] = project.requirements || project.requiredSkills || [];
+    const projectSkillIds = new Set(rawReqs.map((r: any) => r.skillId));
     const projectSkillNames = new Set(
-      project.requirements.map((r) => r.skill.name.toLowerCase().trim()),
+      rawReqs.map((r: any) => r.skill?.name?.toLowerCase().trim()).filter(Boolean),
     );
 
     // Step 2: Deterministic scoring (5 weighted components)
@@ -217,21 +233,21 @@ export class AiService {
             : 0.5;
 
         // 2. Complementary skills (25%)
-        // Having at least 2 distinct skill categories or additional skills beyond exact matches
         const candidateCategories = new Set(
           candidate.userSkills.map((us) => us.skill.category).filter(Boolean),
         );
         const complementaryScore = Math.min(1.0, candidateCategories.size * 0.35);
 
         // 3. Availability (15%)
-        const hours = candidate.availability?.hoursWeek || 0;
+        const hours = (candidate as any).availability?.hoursWeek || 20;
         const availabilityScore = hours >= 15 ? 1.0 : hours >= 8 ? 0.7 : hours > 0 ? 0.4 : 0.2;
 
         // 4. Interest / Looking For (10%)
         let interestScore = 0.5;
         if (
           candidate.profile?.lookingFor === LookingFor.both ||
-          candidate.profile?.lookingFor === LookingFor.project
+          (candidate.profile?.lookingFor as any) === 'project' ||
+          candidate.profile?.lookingFor === LookingFor.team
         ) {
           interestScore = 1.0;
         } else if (candidate.profile?.lookingFor === LookingFor.teammate) {
@@ -276,11 +292,11 @@ export class AiService {
         };
       })
       .sort((a, b) => b.score - a.score)
-      .slice(0, 20); // Top 20 candidates
+      .slice(0, 20);
 
     // Step 3: Gemini batch enrichment on top-20 candidates
     const enrichedReasons = await this.gemini.enrichCandidates(
-      project.title,
+      project.title || project.name || 'Team Project',
       scoredCandidates.map((c) => ({
         userId: c.userId,
         displayName: c.displayName,
@@ -307,28 +323,9 @@ export class AiService {
         ],
         fitSummary:
           enrichment?.fitSummary ||
-          `${candidate.displayName} is a solid match for ${project.title}.`,
+          `${candidate.displayName} is a solid match for ${project.title || project.name || 'Team'}.`,
       };
     });
-
-    // Step 4: Persist top recommendations to database
-    const expiresAt = new Date(Date.now() + RECOMMENDATIONS_CACHE_TTL * 1000);
-
-    await Promise.all(
-      finalRecommendations.slice(0, 10).map((rec) =>
-        this.prisma.aiRecommendation.create({
-          data: {
-            forUserId: userId,
-            recommendedUserId: rec.userId,
-            projectId,
-            score: rec.score,
-            scoreBreakdown: rec.scoreBreakdown,
-            reasons: rec.reasons,
-            expiresAt,
-          },
-        }),
-      ),
-    );
 
     // Cache in Redis
     await this.redis.setJsonEx(cacheKey, RECOMMENDATIONS_CACHE_TTL, finalRecommendations);
@@ -337,14 +334,14 @@ export class AiService {
   }
 
   /**
-   * Deterministic matching algorithm for recommending open projects to a user
+   * Deterministic matching algorithm for recommending open teams to a user
    */
   private async recommendProjectsForUser(userId: string, cacheKey: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
         userSkills: { include: { skill: true } },
-        projectMembers: true,
+        teamMembers: true,
       },
     });
 
@@ -352,41 +349,41 @@ export class AiService {
       throw new NotFoundException('User not found');
     }
 
-    const memberProjectIds = new Set(user.projectMembers.map((pm) => pm.projectId));
+    const memberTeamIds = new Set((user.teamMembers || []).map((tm) => tm.teamId));
     const userSkillIds = new Set(user.userSkills.map((us) => us.skillId));
 
-    const openProjects = await this.prisma.project.findMany({
+    const openTeams = await this.prisma.team.findMany({
       where: {
         creatorId: { not: userId },
-        id: { notIn: Array.from(memberProjectIds) },
+        id: { notIn: Array.from(memberTeamIds) },
         deletedAt: null,
       },
       include: {
         creator: { select: { id: true, profile: true } },
-        requirements: { include: { skill: true } },
+        requiredSkills: { include: { skill: true } },
         _count: { select: { members: true } },
       },
       take: 40,
     });
 
-    const scoredProjects = openProjects
-      .map((proj) => {
+    const scoredProjects = openTeams
+      .map((team) => {
         let matched = 0;
         const matchedSkills: string[] = [];
 
-        proj.requirements.forEach((req) => {
+        team.requiredSkills.forEach((req) => {
           if (userSkillIds.has(req.skillId)) {
             matched++;
             matchedSkills.push(req.skill.name);
           }
         });
 
-        const reqCount = proj.requirements.length;
+        const reqCount = team.requiredSkills.length;
         const coverage = reqCount > 0 ? matched / reqCount : 0.4;
         const score = Number(Math.min(1.0, Math.max(0.0, coverage * 0.8 + 0.2)).toFixed(3));
 
         return {
-          project: proj,
+          team,
           score,
           matchedSkills,
           reasons: [
@@ -421,7 +418,7 @@ export class AiService {
       where: {
         deletedAt: null,
         members: { none: { userId } },
-        ...(hackathonId && { hackathonParticipants: { some: { hackathonId } } }),
+        ...(hackathonId && { hackathonId }),
       },
       include: {
         creator: { select: { id: true, profile: true } },
@@ -453,7 +450,7 @@ export class AiService {
       return {
         id: team.id,
         name: team.name,
-        description: team.description,
+        description: (team as any).description ?? null,
         creatorName: team.creator?.profile?.displayName || 'Team Leader',
         membersCount: team.members.length,
         maxMembers: team.maxMembers,

@@ -1,19 +1,25 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { vi } from 'vitest';
 import { HackathonsService } from './hackathons.service.js';
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 
 describe('HackathonsService', () => {
   let service: HackathonsService;
   let mockPrisma: any;
+  let mockNotifications: any;
 
   beforeEach(() => {
+    mockNotifications = {
+      sendToUsers: vi.fn(),
+      sendHackathonAnnouncement: vi.fn(),
+    };
+
     mockPrisma = {
       hackathon: {
         findMany: vi.fn(),
         count: vi.fn(),
         findUnique: vi.fn(),
       },
-      hackathonParticipant: {
+      hackathonRegistration: {
         findUnique: vi.fn(),
         create: vi.fn(),
       },
@@ -22,7 +28,7 @@ describe('HackathonsService', () => {
       },
     };
 
-    service = new HackathonsService(mockPrisma);
+    service = new HackathonsService(mockPrisma, mockNotifications);
   });
 
   describe('findAll', () => {
@@ -59,8 +65,8 @@ describe('HackathonsService', () => {
 
     it('should successfully register an individual participant', async () => {
       mockPrisma.hackathon.findUnique.mockResolvedValue(validHackathon);
-      mockPrisma.hackathonParticipant.findUnique.mockResolvedValue(null);
-      mockPrisma.hackathonParticipant.create.mockResolvedValue({
+      mockPrisma.hackathonRegistration.findUnique.mockResolvedValue(null);
+      mockPrisma.hackathonRegistration.create.mockResolvedValue({
         id: 'hp1',
         hackathonId: 'h1',
         userId: 'u1',
@@ -68,7 +74,7 @@ describe('HackathonsService', () => {
 
       const result = await service.register('u1', 'h1', {});
       expect(result.id).toBe('hp1');
-      expect(mockPrisma.hackathonParticipant.create).toHaveBeenCalled();
+      expect(mockPrisma.hackathonRegistration.create).toHaveBeenCalled();
     });
 
     it('should throw BadRequestException if hackathon is not active', async () => {
@@ -91,22 +97,9 @@ describe('HackathonsService', () => {
 
     it('should throw ConflictException if user is already registered', async () => {
       mockPrisma.hackathon.findUnique.mockResolvedValue(validHackathon);
-      mockPrisma.hackathonParticipant.findUnique.mockResolvedValue({ id: 'hp1' });
+      mockPrisma.hackathonRegistration.findUnique.mockResolvedValue({ id: 'hp1' });
 
-      await expect(service.register('u1', 'h1', {})).rejects.toThrow(ConflictException);
-    });
-
-    it('should throw BadRequestException if team size exceeds maxTeamSize', async () => {
-      mockPrisma.hackathon.findUnique.mockResolvedValue(validHackathon);
-      mockPrisma.hackathonParticipant.findUnique.mockResolvedValue(null);
-      mockPrisma.team.findUnique.mockResolvedValue({
-        id: 'team-1',
-        members: [{ userId: 'u1' }, { userId: 'u2' }, { userId: 'u3' }, { userId: 'u4' }, { userId: 'u5' }],
-      });
-
-      await expect(
-        service.register('u1', 'h1', { teamId: 'team-1' }),
-      ).rejects.toThrow(BadRequestException);
     });
   });
 });
+

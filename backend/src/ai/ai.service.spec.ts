@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { vi } from 'vitest';
 import { AiService } from './ai.service.js';
 import { BadRequestException } from '@nestjs/common';
 import { LookingFor, SkillLevel } from '@prisma/client';
@@ -130,7 +130,7 @@ describe('AiService', () => {
           avatarUrl: null,
           bio: 'Mobile Dev',
           college: 'MIT',
-          lookingFor: LookingFor.project,
+          lookingFor: LookingFor.team,
         },
         userSkills: [
           {

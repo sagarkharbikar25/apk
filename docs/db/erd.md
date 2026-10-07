@@ -1,6 +1,7 @@
 # SkillSync — Database ERD (12 Tables)
 
 > Plan reference: `plan/01_DATABASE.md`
+> Schema v2 Frozen Architecture
 
 ```mermaid
 erDiagram
@@ -8,11 +9,11 @@ erDiagram
     users ||--o{ user_skills : "has"
     skills ||--o{ user_skills : "belongs to"
     users ||--o{ hackathons : "organizes"
-    hackathons ||--o{ hackathon_participants : "registers"
-    users ||--o{ hackathon_participants : "participates in"
-    hackathons ||--o{ teams : "has"
+    hackathons ||--o{ hackathon_registrations : "registers"
+    users ||--o{ hackathon_registrations : "registered in"
+    hackathons ||--o{ teams : "hosts"
     users ||--o{ teams : "creates"
-    teams ||--o{ team_members : "contains"
+    teams ||--o{ team_members : "composite FK (id, hackathon_id)"
     users ||--o{ team_members : "member of"
     teams ||--o{ team_required_skills : "requires"
     skills ||--o{ team_required_skills : "required in"
@@ -41,7 +42,10 @@ erDiagram
         int graduation_year
         string github_url
         string linkedin_url
+        string portfolio_url
+        string location
         enum looking_for "teammate | team | both | not_looking"
+        string[] preferred_roles
     }
 
     skills {
@@ -63,18 +67,20 @@ erDiagram
         uuid organizer_id FK
         string title
         string description
+        string venue
         timestamp start_date
         timestamp end_date
         timestamp registration_deadline
         int max_team_size
+        enum status "draft | open | closed | completed"
         boolean is_active
     }
 
-    hackathon_participants {
+    hackathon_registrations {
         uuid id PK
         uuid hackathon_id FK
         uuid user_id FK
-        uuid team_id FK
+        boolean checked_in
     }
 
     teams {
@@ -84,15 +90,21 @@ erDiagram
         string name
         string description
         int max_members
-        string qr_code UK
         timestamp deleted_at
+    }
+
+    team_required_skills {
+        uuid id PK
+        uuid team_id FK
+        uuid skill_id FK
     }
 
     team_members {
         uuid id PK
         uuid team_id FK
+        uuid hackathon_id FK
         uuid user_id FK
-        boolean is_admin
+        boolean is_leader
         string role
         timestamp joined_at
     }

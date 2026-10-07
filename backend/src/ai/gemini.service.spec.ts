@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { vi } from 'vitest';
 import { GeminiService } from './gemini.service.js';
 import { ConfigService } from '@nestjs/config';
 

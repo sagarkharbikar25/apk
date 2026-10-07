@@ -31,18 +31,23 @@ export class TeamsService {
   // ── POST /teams ─────────────────────────────────────────────
   async create(userId: string, dto: CreateTeamDto) {
     const qrCode = uuidv4();
+    const hackathonId = dto.hackathonId || (dto as any).projectId;
+    if (!hackathonId) {
+      throw new BadRequestException('hackathonId is required');
+    }
 
     const team = await this.prisma.team.create({
       data: {
         name: dto.name,
-        projectId: dto.projectId,
-        maxMembers: dto.maxMembers || 5,
+        hackathonId,
+        description: dto.description || null,
+        maxMembers: dto.maxMembers || 4,
         creatorId: userId,
-        qrCode,
         members: {
           create: {
             userId,
-            isAdmin: true,
+            hackathonId,
+            isLeader: true,
             role: 'Leader',
           },
         },
@@ -58,6 +63,7 @@ export class TeamsService {
     });
 
     // Store QR token in Redis with 24h TTL
+    await this.redis.setEx(`team_qr:${team.id}`, QR_TOKEN_TTL, qrCode);
     await this.redis.setEx(`qr_join:${qrCode}`, QR_TOKEN_TTL, team.id);
 
     return team;
@@ -120,9 +126,8 @@ export class TeamsService {
             },
           },
         },
-        hackathonParticipants: {
-          include: { hackathon: true },
-        },
+        hackathon: true,
+        requiredSkills: { include: { skill: true } },
       },
     });
 
@@ -144,10 +149,10 @@ export class TeamsService {
       throw new NotFoundException(`Team with ID ${teamId} not found`);
     }
 
-    // If QR token is passed, validate from Redis or DB
+    // If QR token is passed, validate from Redis
     if (dto?.qrToken) {
       const redisTeamId = await this.redis.get(`qr_join:${dto.qrToken}`);
-      if (redisTeamId !== teamId && team.qrCode !== dto.qrToken) {
+      if (redisTeamId !== teamId) {
         throw new BadRequestException('Invalid or expired QR token');
       }
     }
@@ -166,8 +171,9 @@ export class TeamsService {
     const newMember = await this.prisma.teamMember.create({
       data: {
         teamId,
+        hackathonId: team.hackathonId,
         userId,
-        isAdmin: false,
+        isLeader: false,
         role: 'Member',
       },
       include: {
@@ -198,9 +204,9 @@ export class TeamsService {
       throw new NotFoundException(`Team with ID ${teamId} not found`);
     }
 
-    // Check inviter is an admin or creator
+    // Check inviter is a leader or creator
     const inviterMember = team.members.find((m) => m.userId === inviterId);
-    if (!inviterMember?.isAdmin && team.creatorId !== inviterId) {
+    if (!inviterMember?.isLeader && team.creatorId !== inviterId) {
       throw new ForbiddenException('Only team admins can invite new members');
     }
 
@@ -303,8 +309,9 @@ export class TeamsService {
           update: {},
           create: {
             teamId: invitation.teamId,
+            hackathonId: invitation.team.hackathonId,
             userId,
-            isAdmin: false,
+            isLeader: false,
             role: 'Member',
           },
         });
@@ -348,17 +355,14 @@ export class TeamsService {
     if (!team) throw new NotFoundException('Team not found');
     const isLeader =
       team.creatorId === userId ||
-      team.members.some((m) => m.userId === userId && m.isAdmin);
+      team.members.some((m) => m.userId === userId && m.isLeader);
     if (!isLeader) {
       throw new ForbiddenException('Only team leaders can generate or rotate QR tokens');
     }
 
     const token = uuidv4();
+    await this.redis.setEx(`team_qr:${teamId}`, QR_TOKEN_TTL, token);
     await this.redis.setEx(`qr_join:${token}`, QR_TOKEN_TTL, team.id);
-    await this.prisma.team.update({
-      where: { id: teamId },
-      data: { qrCode: token },
-    });
 
     return {
       token,
@@ -376,7 +380,7 @@ export class TeamsService {
     if (!team) throw new NotFoundException('Team not found');
     const isLeader =
       team.creatorId === currentUserId ||
-      team.members.some((m) => m.userId === currentUserId && m.isAdmin);
+      team.members.some((m) => m.userId === currentUserId && m.isLeader);
     const isSelf = currentUserId === targetUserId;
 
     if (!isLeader && !isSelf) {

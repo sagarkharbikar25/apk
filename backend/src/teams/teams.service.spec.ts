@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { vi } from 'vitest';
 import { TeamsService } from './teams.service.js';
 import {
   BadRequestException,
@@ -52,7 +52,7 @@ describe('TeamsService', () => {
       const mockTeam = { id: 'team-1', name: 'Alpha', qrCode: 'qr-123' };
       mockPrisma.team.create.mockResolvedValue(mockTeam);
 
-      const result = await service.create('user-1', { name: 'Alpha', maxMembers: 5 });
+      const result = await service.create('user-1', { name: 'Alpha', hackathonId: 'h-1', maxMembers: 5 });
       expect(result).toEqual(mockTeam);
       expect(mockRedis.setEx).toHaveBeenCalledWith(
         expect.stringContaining('qr_join:'),
@@ -131,10 +131,11 @@ describe('TeamsService', () => {
     it('should send FCM notification when admin invites user', async () => {
       mockPrisma.team.findFirst.mockResolvedValue({
         id: 'team-1',
+        hackathonId: 'h-1',
         name: 'Team Rocket',
         creatorId: 'user-1',
         maxMembers: 5,
-        members: [{ userId: 'user-1', isAdmin: true }],
+        members: [{ userId: 'user-1', isLeader: true }],
       });
       mockPrisma.teamInvitation.findFirst.mockResolvedValue(null);
       mockPrisma.teamInvitation.create.mockResolvedValue({ id: 'inv-1' });
@@ -153,9 +154,10 @@ describe('TeamsService', () => {
     it('should throw 403 ForbiddenException when non-admin invites', async () => {
       mockPrisma.team.findFirst.mockResolvedValue({
         id: 'team-1',
+        hackathonId: 'h-1',
         creatorId: 'creator-1',
         maxMembers: 5,
-        members: [{ userId: 'user-regular', isAdmin: false }],
+        members: [{ userId: 'user-regular', isLeader: false }],
       });
 
       await expect(
@@ -166,9 +168,10 @@ describe('TeamsService', () => {
     it('should throw 409 ConflictException when invitee is already a member', async () => {
       mockPrisma.team.findFirst.mockResolvedValue({
         id: 'team-1',
+        hackathonId: 'h-1',
         creatorId: 'user-1',
         maxMembers: 5,
-        members: [{ userId: 'user-1', isAdmin: true }, { userId: 'user-2' }],
+        members: [{ userId: 'user-1', isLeader: true }, { userId: 'user-2' }],
       });
 
       await expect(
@@ -213,7 +216,7 @@ describe('TeamsService', () => {
       expect(mockPrisma.teamMember.upsert).toHaveBeenCalledWith({
         where: { teamId_userId: { teamId: 'team-1', userId: 'user-1' } },
         update: {},
-        create: { teamId: 'team-1', userId: 'user-1', isAdmin: false, role: 'Member' },
+        create: { teamId: 'team-1', hackathonId: undefined, userId: 'user-1', isLeader: false, role: 'Member' },
       });
       expect(mockNotifications.notify).toHaveBeenCalledWith(
         'inviter-1',
